@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/enseignant.css">
+    <title>Espace enseignant</title>
+</head>
+<body>
+   
+    <%- include('../partials-enseignant/header.ejs') %>
+<main>
+    <section id="dashboard">
+        <h2>Tableau de bord</h2>
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Examens créés</h3>
+                <p id="nb-examens">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Questions</h3>
+                <p id="nb-questions">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Examens passés</h3>
+                <p id="nb-passages">0</p>
+            </div>
+        </div>
+        <div class="recent-activity">
+            <h3>Activité récente</h3>
+            <ul id="liste-activites">
+              
+            </ul>
+        </div>
+    </section>
+    <section id="creer-examen">
+        <%- include('./create-exams.ejs') %>
+    </section>
+    <section id="examens">
+        <%- include("./examens.ejs") %>
+    </section>
+</main>
+</body>
+<script src="/javascript/enseignant.js"></script>
+</html>
