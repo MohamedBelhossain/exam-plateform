@@ -28,15 +28,7 @@ app.set("layout", "layouts/layout");
 app.use(expressLayouts);
 app.use(express.static("public"));
 
-
 require('dotenv').config();
-
-// app.use((req, res, next) => {
-//   res.locals.user = req.session.user || null;
-//   next();
-// });
-// cette partie necessaire les informations de login session
-
 const mongoose = require('mongoose');
 mongoose.connect(process.env.DATABASE_URL)
   .then(() => {

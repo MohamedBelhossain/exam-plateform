@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/enseignant-parametres-profile.css">
+</head>
+<body>
+    <section id="parametres" class="main-section">
+        <div class="section-header">
+          <h2>Paramètres</h2>
+          <p>Configurez vos préférences</p>
+        </div>
+      
+        <div class="settings-container">
+          <form id="form-parametres-generaux" class="settings-card">
+            <h3>Préférences Générales</h3>
+            <div class="form-group">
+              <label for="langue">Langue :</label>
+              <select id="langue" name="langue" class="form-control">
+                <option value="fr">Français</option>
+                <option value="en">Anglais</option>
+                <option value="ar">Arabe</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="fuseau-horaire">Fuseau Horaire :</label>
+              <select id="fuseau-horaire" name="fuseau_horaire" class="form-control">
+                <option value="UTC+0">UTC+0</option>
+                <option value="UTC+1" selected>UTC+1 (Maroc)</option>
+                <option value="UTC+2">UTC+2</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Notifications :</label>
+              <div class="checkbox-group"><input type="checkbox" id="notif-email" checked><label for="notif-email">Email</label></div>
+              <div class="checkbox-group"><input type="checkbox" id="notif-app" checked><label for="notif-app">App</label></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+          </form>
+      
+          <form id="form-securite" class="settings-card">
+            <h3>Sécurité</h3>
+            <div class="form-group"><label for="ancien-mot-de-passe">Ancien mot de passe :</label><input type="password" id="ancien-mot-de-passe" required class="form-control"></div>
+            <div class="form-group"><label for="nouveau-mot-de-passe">Nouveau mot de passe :</label><input type="password" id="nouveau-mot-de-passe" required class="form-control"></div>
+            <div class="form-group"><label for="confirmer-mot-de-passe">Confirmer :</label><input type="password" id="confirmer-mot-de-passe" required class="form-control"></div>
+            <button type="submit" class="btn btn-primary">Changer</button>
+          </form>
+        </div>
+      
+    <div class="buttons-container">
+        <button onclick="exitPage()" class="btn btn-exit">Quitter</button>
+    </div>
+    </section>
+
+    <script>
+        function exitPage() {
+            window.location.href = "/enseignant"; // pour retourner a la page principal
+        }
+    </script>
+<script src="/javascript/enseignant-parametres-profile.js"></script>
+</body>
+</html>

@@ -1,15 +1,17 @@
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
 }
 
 body {
+    font-family: Arial, sans-serif;
     background-color: #f5f7fa;
     color: #333;
     line-height: 1.5;
 }
+
 
 header {
     display: flex;
@@ -24,8 +26,8 @@ header {
 }
 
 header h1 {
-    color: #010036;
     font-size: 24px;
+    color: #010036;
 }
 
 nav ul {
@@ -46,53 +48,29 @@ nav a {
     transition: all 0.3s;
 }
 
-nav a:hover {
-    color: #010036;
-}
-
+nav a:hover,
 nav a.active {
     color: #010036;
     border-bottom: 2px solid #010036;
 }
 
 
-
 .user-info {
     position: relative;
     display: inline-block;
-    font-family: Arial, sans-serif;
-  }
-  
-  
-  .user-info p {
+}
+
+.user-info p,
+.dropdown p {
     font-size: 16px;
-    margin: 0;
-    padding: 10px;
     font-weight: bold;
     color: #333;
-  }
-  
-
-  .dropdown {
-    position: relative;
-  }
-  
-  
-  .dropdown p {
+    margin: 0;
+    padding: 10px;
     cursor: pointer;
-    color: #000000;
-    transition: color 0.3s ease;
-    font-size: 20px;;
-  }
-  
-  
-  .dropdown p:hover {
-    background-color: #575050b5; 
-     border-radius: 5px;
-  }
-  
-  
-  .dropdown-menu {
+}
+
+.dropdown-menu {
     display: none;
     position: absolute;
     top: 100%;
@@ -103,46 +81,39 @@ nav a.active {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     min-width: 160px;
     z-index: 1;
-    padding: 10px 0;
-  }
-  
-  
-  .dropdown-menu a {
+}
+
+.dropdown-menu a {
     display: block;
     padding: 8px 16px;
     color: #333;
     text-decoration: none;
     transition: background-color 0.3s ease;
-  }
-  
-  
-  .dropdown-menu a:hover {
+}
+
+.dropdown-menu a:hover {
     background-color: #f1f1f1;
     color: #007bff;
-  }
-  
-  
-  .dropdown:hover .dropdown-menu {
+}
+
+.dropdown:hover .dropdown-menu {
     display: block;
-  }
-  
-  
-  #btn-deconnexion {
+}
+
+#btn-deconnexion {
     color: #ff3b3b;
     font-weight: bold;
-  }
-  
-  #btn-deconnexion:hover {
+}
+
+#btn-deconnexion:hover {
     color: #e60000;
-  }
-  
-  
+}
+
 main {
     padding: 30px;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: auto;
 }
-
 section {
     display: none;
     background-color: white;
@@ -150,26 +121,28 @@ section {
     padding: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
-
 section.section-active {
     display: block;
 }
 
 .hidden {
     display: none !important;
-}
+} 
+
 
 h2 {
+    font-size: 24px;
     margin-bottom: 20px;
-    color: #333;
-    border-bottom: 1px solid #ecf0f1;
     padding-bottom: 10px;
+    border-bottom: 1px solid #ecf0f1;
 }
 
 h3 {
+    font-size: 20px;
+    color: #2c3e50;
     margin-bottom: 15px;
-    color: #333;
 }
+
 
 .stats-container {
     display: grid;
@@ -183,11 +156,6 @@ h3 {
     padding: 20px;
     border-radius: 5px;
     text-align: center;
-}
-
-.stat-card h3 {
-    font-size: 16px;
-    margin-bottom: 8px;
 }
 
 .stat-card p {
@@ -211,23 +179,15 @@ h3 {
     border-bottom: 1px solid #bdc3c7;
 }
 
-.recent-activity li:last-child {
-    border-bottom: none;
-}
-
-#lien-generé{
-    margin-top: 1em;
-    display: none;
-}
-
-
 label {
     display: block;
     margin-bottom: 8px;
     font-weight: bold;
 }
 
-input, textarea, select {
+input,
+textarea,
+select {
     width: 100%;
     padding: 10px;
     border: 1px solid #bdc3c7;
@@ -239,22 +199,93 @@ textarea {
     min-height: 100px;
     resize: vertical;
 }
-button[type="submit"] {
-    margin-top:10px;
 
+button[type="submit"] {
+    margin-top: 10px;
     font-size: 18px;
     width: 180px;
-    height:50px; 
-    background-color: #363a3d; 
-    color: white; 
-    border: none; 
-    border-radius: 5px; 
-    cursor: pointer; 
-    transition: background-color 0.3s ease; 
-  }
-  
- 
-  button[type="submit"]:hover {
+    height: 50px;
+    background-color: #363a3d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
     background-color: #64686d;
-  }
+}
+
+
+.search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.search-bar input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    width: 400px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.search-bar button {
+    padding: 10px 15px;
+    font-size: 16px;
+    width:70px;
+    background-color: #0e0e0ee7;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.search-bar button:hover {
+    background-color: #505258;
+}
+
+
+.examens-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.exam-card {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    width: 300px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.exam-card:hover {
+    transform: scale(1.02);
+}
+
+.exam-card p {
+    font-size: 15px;
+    margin: 10px 0;
+    color: #555;
+}
+
+.exam-link {
+    display: inline-block;
+    margin-top: 10px;
+    background-color: #000000e4;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.exam-link:hover {
+    background-color: #3f453f;
+}
 
