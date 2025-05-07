@@ -18,7 +18,11 @@ app.use("/enseignant", enseignantRouter);
 app.use("/etudiant", etudiantRouter);  
 app.use("/auth",authRouter);
 
+// Importation du contrôleur d'examen pour la route publique
+const examController = require('./controllers/enseignant');
 
+// Route publique pour accéder aux examens par UUID
+app.get("/examen/:uuid", examController.getExamByUUID);
 
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
@@ -27,6 +31,7 @@ app.set("layout", "layouts/layout");
 
 app.use(expressLayouts);
 app.use(express.static("public"));
+
 
 require('dotenv').config();
 const mongoose = require('mongoose');

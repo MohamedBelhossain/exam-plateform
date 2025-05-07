@@ -1,0 +1,84 @@
+<div class="container">
+    <h1><%= exam.titre %></h1>
+    <div class="exam-details">
+        <p><strong>Description:</strong> <%= exam.description %></p>
+        <p><strong>Public cible:</strong> <%= exam.public %></p>
+        <% if (exam.uuid) { %>
+            <p><strong>ID unique:</strong> <%= exam.uuid %></p>
+        <% } else { %>
+            <p><strong>Lien d'accès:</strong> <%= exam.lienAcces %></p>
+        <% } %>
+    </div>
+    
+    <div class="exam-content">
+        <p>Contenu de l'examen à venir...</p>
+    </div>
+    
+    <div class="actions">
+        <a onclick="exitPage()" class="btn">Retour à l'accueil</a>
+    </div>
+</div>
+<style>
+    .container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container h1 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #4a90e2;
+    padding-bottom: 10px;
+}
+
+.exam-details p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 12px;
+}
+
+.exam-details strong {
+    color: #222;
+}
+
+.exam-content {
+    margin-top: 30px;
+    font-style: italic;
+    color: #777;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-left: 4px solid #4a90e2;
+    border-radius: 6px;
+}
+
+.actions {
+    margin-top: 30px;
+    text-align: right;
+}
+
+.btn {
+    background-color: #000000;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+    background-color: #3f4144;
+}
+
+</style>
+<script>
+    function exitPage() {
+        window.location.href = "/enseignant"; // pour retourner a la page principal
+    }
+</script>
