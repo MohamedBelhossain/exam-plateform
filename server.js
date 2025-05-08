@@ -1,24 +1,25 @@
-
 const express = require("express");
 const app = express();
 const expressLayouts = require("express-ejs-layouts");
 
-const cors= require('cors');
+const cors = require('cors');
 app.use(cors());
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-const enseignantRouter = require("./routes/enseignant"); 
-const etudiantRouter = require("./routes/etudiant"); 
-const authRouter= require("./routes/auth");
+const enseignantRouter = require("./routes/enseignant");
+
+const etudiantRoutes = require('./routes/etudiantRoutes');
+
+const authRouter = require("./routes/auth");
 
 
 
-app.use("/enseignant", enseignantRouter);  
-app.use("/etudiant", etudiantRouter);  
-app.use("/auth",authRouter);
+app.use("/enseignant", enseignantRouter);
 
-
+app.use("/auth", authRouter);
+app.use('/etudiant', etudiantRoutes);
+app.use('/etudiant', etudiantRoutes);
+app.use('/api/etudiant', etudiantRoutes);
 
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
@@ -31,25 +32,16 @@ app.use(express.static("public"));
 
 require('dotenv').config();
 
-// app.use((req, res, next) => {
-//   res.locals.user = req.session.user || null;
-//   next();
-// });
-// cette partie necessaire les informations de login session
-
 const mongoose = require('mongoose');
 mongoose.connect(process.env.DATABASE_URL)
-  .then(() => {
-    console.log("Connected to MongoDB Atlas!");
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB Atlas:", error);
-  });
+    .then(() => {
+        console.log("Connected to MongoDB Atlas!");
+    })
+    .catch((error) => {
+        console.error("Error connecting to MongoDB Atlas:", error);
+    });
 
 
 app.listen(process.env.PORT || 3000, () => {
-  console.log("Server is running...");
+    console.log("Server is running...");
 });
-
-
-

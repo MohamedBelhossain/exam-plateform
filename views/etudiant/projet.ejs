@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Etudiant</title>
+    <link rel="stylesheet" href="/css/projet.css">
+</head>
+<div class="back">
+    <div class="student-logo">
+        <div class="logo-oval">Platforme</div>
+    </div>
+    <h1 class="main-title">Bienvenue Dans Espace Étudiant</h1>
+    <button class="signout-button">Sign Out</button>
+</div>
+
+<body>
+    <div class="info-section">
+        <div class="info-card">
+            <h2>🖊 Règles de l'examen</h2>
+            <ul>
+                <li>L'examen dure limite </li>
+                <li>Toute tentative de triche sera sanctionnée</li>
+                <li>Vous ne pouvez pas revenir en arrière après avoir répondu</li>
+                <li>La localisation est requise pour valider l'examen</li>
+            </ul>
+        </div>
+
+        <div class="info-card">
+            <h2>📍 À propos de la géolocalisation</h2>
+            <ul>
+                <li>Nous avons besoin de votre position pour vérifier votre identité</li>
+                <li>Les données de localisation Cera enregistrer</li>
+                <li>Si la localisation échoue, actualisez la page et réessayez</li>
+                <li>Assurez-vous que les permissions sont activées</li>
+            </ul>
+        </div>
+    </div>
+    <div class="container">
+        <!-- Étape 1 de  Démarrage -->
+        <div id="start-section" class="section">
+            <h1>Examen en ligne</h1>
+            <button id="start-btn">Commencer l'examen</button>
+        </div>
+
+        <!-- Étape 2 de  Géolocalisation -->
+        <div id="geolocation-section" class="section hidden">
+            <div class="icon">🌍</div>
+            <h2>Validation de la Localisation</h2>
+            <p>Nous avons besoin de votre position pour sécuriser l'examen.</p>
+            <button id="location-btn">Autoriser la localisation</button>
+            <div id="location-status" class="status"></div>
+        </div>
+
+        <!-- Étape 3 de Examen -->
+        <div id="exam-section" class="section hidden">
+            <div class="timer">⏱ Temps : <span id="time">05:00</span></div>
+            <div id="question-container">
+                <h2 id="question-text"></h2>
+                <div id="options-container" class="options"></div>
+            </div>
+            <button id="next-btn" disabled>Suivant</button>
+        </div>
+
+        <!-- Étape 4 de Résultats -->
+        <div id="results-section" class="section hidden">
+            <div class="icon">📊</div>
+            <h2>Résultats</h2>
+            <p class="score">Score : <span id="score">0</span>/100</p>
+            <div id="results-status" class="status success"></div>
+        </div>
+    </div>
+    <script src="/javascript/projet.js"></script>
+</body>
+
+</html>
