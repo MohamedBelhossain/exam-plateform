@@ -125,9 +125,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 <h3>${exam.titre}</h3>
                 <p><strong>Description :</strong> ${exam.description}</p>
                 <p><strong>Public ciblé :</strong> ${exam.public}</p>
+                <a href="/enseignant/examens/${exam.uuid}/add-questions" class="btn-edit">Modifier</a>
+
                 <a href="${exam.lienAcces}" class="exam-link" target="_blank">Accéder à l'examen</a>
             </div>`;
         };
+        
 
         // Fonction pour afficher les examens dans le DOM
         const afficherExamens = (examensFiltrés) => {

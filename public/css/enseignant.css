@@ -288,4 +288,19 @@ button[type="submit"]:hover {
 .exam-link:hover {
     background-color: #3f453f;
 }
+.btn-edit {
+    display: inline-block;
+    margin-top: 10px;
+    background-color: #000000e4;
+    color: white;
+    width:173px;
+    height:40px;
+    padding: 10px 12px 0px 55px;;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+}
+.btn-edit:hover {
+    background-color: #232220cf;
+}
 

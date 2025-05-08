@@ -1,0 +1,324 @@
+<h2>Ajouter des questions à l'examen</h2>
+
+<div class="exam-info">
+    <h3><%= exam.titre %></h3>
+    <p><%= exam.description %></p>
+    <p><strong>Public:</strong> <%= exam.public %></p>
+</div>
+
+<form action="/enseignant/examens/<%= exam.uuid %>/add-questions" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="enonce">Énoncé :</label>
+        <textarea name="enonce" id="enonce" required class="form-control"></textarea>
+        <label for="media">Joindre un fichier (image, audio, vidéo) :</label>
+        <input type="file" name="media" id="media" class="form-control" accept="image/*,audio/*,video/*">
+    </div>
+   
+    
+    
+    
+    <div class="form-group">
+        <label for="type">Type de question :</label>
+        <select name="type" id="type" required class="form-control">
+            <option value="qcm">QCM</option>
+            <option value="directe">Question directe</option>
+        </select>
+    </div>
+    
+    <div id="qcm-fields" class="form-group">
+        <label>Choix :</label>
+        <div id="choix-container" class="choix-container">
+            <div class="choix-input">
+                <input type="text" name="choix[]" placeholder="Choix 1" class="form-control">
+                <button type="button" class="btn-remove" onclick="removeChoix(this)">X</button>
+            </div>
+            <div class="choix-input">
+                <input type="text" name="choix[]" placeholder="Choix 2" class="form-control">
+                <button type="button" class="btn-remove" onclick="removeChoix(this)">X</button>
+            </div>
+        </div>
+        <button type="button" id="add-choix-btn" class="btn-secondary">Ajouter un choix</button>
+        
+        <div class="form-group mt-3">
+            <label for="bonneReponse">Réponse correcte :</label>
+            <select name="bonneReponse" id="bonneReponse" class="form-control">
+                <option value="">Sélectionnez la bonne réponse</option>
+            </select>
+        </div>
+    </div>
+    
+    <div id="directe-fields" class="form-group" style="display:none;">
+        <label for="bonneReponseDirecte">Réponse correcte :</label>
+        <input type="text" name="bonneReponseDirecte" id="bonneReponseDirecte" class="form-control" placeholder="Réponse attendue">
+    </div>
+    
+    <div class="form-group">
+        <label for="points">Points :</label>
+        <input type="number" name="points" id="points" min="1" value="1" required class="form-control">
+    </div>
+    
+    <button type="submit" class="btn-primary">Ajouter la question</button>
+</form>
+
+<% if (exam.questions && exam.questions.length > 0) { %>
+    <div class="questions-list">
+        <h3>Questions déjà ajoutées :</h3>
+        <ul>
+            <% exam.questions.forEach((q, index) => { %>
+                <li class="question-item">
+                    <div class="question-header">
+                        <strong><%= index + 1 %>.</strong> <%= q.enonce %> 
+                        <span class="question-meta">
+                            <%= q.type ? q.type.toUpperCase() : 'TYPE NON DÉFINI' %> - <%= q.points %> points
+                        </span>
+                    </div>
+                    
+                    <% if (q.type === 'qcm') { %>
+                        <ul class="choix-list">
+                            <% q.choix.forEach((choix) => { %>
+                                <li class="<%= choix === q.bonneReponse ? 'correct-answer' : '' %>">
+                                    <%= choix %> <%= choix === q.bonneReponse ? '✓' : '' %>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    <% } else { %>
+                        <div class="direct-answer"><strong>Réponse attendue :</strong> <%= q.bonneReponse %></div>
+                    <% } %>
+                </li>
+            <% }); %>
+        </ul>
+    </div>
+<% } %>
+
+<style>
+    .exam-info {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    textarea.form-control {
+        min-height: 100px;
+    }
+    
+    .choix-container {
+        margin-bottom: 10px;
+    }
+    
+    .choix-input {
+        display: flex;
+        margin-bottom: 5px;
+    }
+    
+    .choix-input input {
+        flex: 1;
+        margin-right: 5px;
+    }
+    
+    .btn-remove {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    
+    .questions-list {
+        margin-top: 30px;
+        border-top: 1px solid #ddd;
+        padding-top: 20px;
+    }
+    
+    .question-item {
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+    }
+    
+    .question-meta {
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+    
+    .choix-list {
+        margin-top: 5px;
+        padding-left: 20px;
+    }
+    
+    .correct-answer {
+        font-weight: bold;
+        color: #28a745;
+    }
+    
+    .mt-3 {
+        margin-top: 15px;
+    }
+</style>
+
+<script>
+    const typeSelect = document.getElementById('type');
+    const qcmFields = document.getElementById('qcm-fields');
+    const directeFields = document.getElementById('directe-fields');
+    const choixContainer = document.getElementById('choix-container');
+    const addChoixBtn = document.getElementById('add-choix-btn');
+    const bonneReponseSelect = document.getElementById('bonneReponse');
+    const bonneReponseDirecte = document.getElementById('bonneReponseDirecte');
+    
+    // Afficher les champs appropriés selon le type au chargement
+    document.addEventListener('DOMContentLoaded', () => {
+        toggleQuestionFields();
+        updateBonneReponseOptions();
+    });
+    
+    // Afficher ou cacher dynamiquement les champs selon le type choisi
+    typeSelect.addEventListener('change', () => {
+        toggleQuestionFields();
+    });
+    
+    function toggleQuestionFields() {
+        const isQcm = typeSelect.value === 'qcm';
+        qcmFields.style.display = isQcm ? 'block' : 'none';
+        directeFields.style.display = isQcm ? 'none' : 'block';
+        
+        // Réinitialiser les champs de l'autre type
+        if (isQcm) {
+            bonneReponseDirecte.value = '';
+        } else {
+            // Vider la sélection dans le QCM
+            bonneReponseSelect.innerHTML = '<option value="">Sélectionnez la bonne réponse</option>';
+        }
+    }
+    
+    // Ajouter dynamiquement un champ de choix
+    addChoixBtn.addEventListener('click', () => {
+        const choixInputs = choixContainer.querySelectorAll('input');
+        const choixCount = choixInputs.length;
+        
+        // Vérifier que le dernier choix n'est pas vide
+        const lastInput = choixInputs[choixCount - 1];
+        if (lastInput && lastInput.value.trim() === '') {
+            alert("Veuillez remplir le choix précédent avant d'en ajouter un nouveau.");
+            return;
+        }
+        
+        const div = document.createElement('div');
+        div.className = 'choix-input';
+        div.innerHTML = `
+            <input type="text" name="choix[]" placeholder="Choix ${choixCount + 1}" class="form-control">
+            <button type="button" class="btn-remove" onclick="removeChoix(this)">X</button>
+        `;
+        choixContainer.appendChild(div);
+        
+        // Mettre à jour les options de bonne réponse
+        updateBonneReponseOptions();
+    });
+    
+    // Supprimer un choix
+    function removeChoix(button) {
+        if (choixContainer.children.length <= 2) {
+            alert("Une question QCM doit avoir au moins 2 choix.");
+            return;
+        }
+        button.parentElement.remove();
+        updateBonneReponseOptions();
+    }
+    
+    // Mettre à jour les options de la liste déroulante de bonnes réponses
+    function updateBonneReponseOptions() {
+        const choixInputs = choixContainer.querySelectorAll('input');
+        bonneReponseSelect.innerHTML = '<option value="">Sélectionnez la bonne réponse</option>';
+        
+        choixInputs.forEach((input, index) => {
+            if (input.value.trim() !== '') {
+                const option = document.createElement('option');
+                option.value = input.value;
+                option.textContent = input.value;
+                bonneReponseSelect.appendChild(option);
+            }
+        });
+    }
+    
+    // Mettre à jour la liste des bonnes réponses quand un choix change
+    choixContainer.addEventListener('input', (event) => {
+        if (event.target.tagName === 'INPUT') {
+            updateBonneReponseOptions();
+        }
+    });
+    
+    // Vérifier le formulaire avant soumission
+    document.querySelector('form').addEventListener('submit', (event) => {
+        const isQcm = typeSelect.value === 'qcm';
+        
+        if (isQcm) {
+            // Pour les QCM, vérifier qu'il y a au moins 2 choix non-vides
+            const choixInputs = choixContainer.querySelectorAll('input');
+            const nonEmptyChoices = Array.from(choixInputs).filter(input => input.value.trim() !== '');
+            
+            if (nonEmptyChoices.length < 2) {
+                event.preventDefault();
+                alert("Une question QCM doit avoir au moins 2 choix.");
+                return;
+            }
+            
+            // Vérifier qu'une bonne réponse est sélectionnée
+            if (!bonneReponseSelect.value) {
+                event.preventDefault();
+                alert("Veuillez sélectionner la bonne réponse.");
+                return;
+            }
+            
+            // Copier la valeur dans le champ bonneReponse "normal"
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'bonneReponse';
+            hiddenInput.value = bonneReponseSelect.value;
+            event.target.appendChild(hiddenInput);
+        } else {
+            // Pour les questions directes, vérifier que la réponse n'est pas vide
+            if (!bonneReponseDirecte.value.trim()) {
+                event.preventDefault();
+                alert("Veuillez indiquer la réponse attendue.");
+                return;
+            }
+            
+            // Copier la valeur dans le champ bonneReponse "normal"
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'bonneReponse';
+            hiddenInput.value = bonneReponseDirecte.value;
+            event.target.appendChild(hiddenInput);
+        }
+    });
+</script>
