@@ -96,30 +96,44 @@ const addQuestionsToExam = async (req, res) => {
             return res.status(404).send("Examen non trouvé");
         }
 
-        const { enonce, type, choix, bonneReponse, points } = req.body;
-        
-        // Handle media upload
         upload.single('media')(req, res, async (err) => {
             if (err) {
                 return res.status(500).send(`Erreur lors de l'upload du fichier: ${err.message}`);
             }
 
             const mediaPath = req.file ? '/uploads/' + req.file.filename : null;
-
-            // Create the new question
-            const newQuestion = new Question({
+            const {
                 enonce,
                 type,
-                choix: type === 'qcm' ? choix.filter(c => c.trim() !== "") : [],
+                choix,
                 bonneReponse,
-                points: Number(points),
-                media: mediaPath, // Store the media file path
-            });
+                bonneReponseDirecte,
+                tolerance
+            } = req.body;
 
-            // Save the question in the database
+            let newQuestion;
+
+            if (type === 'qcm') {
+                newQuestion = new Question({
+                    enonce,
+                    type,
+                    choix: choix.filter(c => c.trim() !== ""),
+                    bonneReponse,
+                    media: mediaPath
+                });
+            } else if (type === 'directe') {
+                newQuestion = new Question({
+                    enonce,
+                    type,
+                    bonneReponse: [bonneReponseDirecte], // Changed from 'reponse' to 'bonneReponseDirecte'
+                    tolerance: Number(tolerance),
+                    media: mediaPath
+                });
+            } else {
+                return res.status(400).send("Type de question non reconnu.");
+            }
+
             await newQuestion.save();
-
-            // Add the question to the exam
             exam.questions.push(newQuestion);
             await exam.save();
 
@@ -131,7 +145,6 @@ const addQuestionsToExam = async (req, res) => {
         res.status(500).send(`Erreur serveur: ${error.message}`);
     }
 };
-
 // Obtenir un examen via UUID
 const getExamByUUID = async (req, res) => {
     try {

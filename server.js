@@ -78,8 +78,8 @@ mongoose.connect(process.env.DATABASE_URL)
   
   // Dans ta route de création de question
   app.post('/enseignant/examens/:uuid/add-questions', upload.single('media'), (req, res) => {
-      // Tu peux maintenant accéder à `req.file` qui contient les informations du fichier téléchargé
-      const mediaPath = req.file ? '/uploads/' + req.file.filename : null; // Lien vers le fichier
+      
+      const mediaPath = req.file ? '/uploads/' + req.file.filename : null; 
   
       // Crée une nouvelle question avec les données envoyées par le formulaire, y compris le chemin du fichier
       const newQuestion = {
@@ -90,8 +90,6 @@ mongoose.connect(process.env.DATABASE_URL)
           points: req.body.points,
           media: mediaPath, // Ajouter le lien vers le fichier média
       };
-  
-      // Sauvegarde dans la base de données, etc.
   });
   
 app.listen(process.env.PORT || 3000, () => {

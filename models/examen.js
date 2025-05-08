@@ -1,4 +1,3 @@
-// models/examen.js
 const mongoose = require('mongoose');
 const questionSchema = require('./question').schema;
 
