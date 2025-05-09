@@ -8,7 +8,7 @@
 }
 
 :root {
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition:  all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --primary-color: rgb(206, 25, 25);
     --secondary-color: rgb(160, 20, 20);
     --dark-bg: rgb(0, 0, 0);
