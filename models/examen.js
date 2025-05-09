@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const questionSchema = require('./question').schema;
 
 const examenSchema = new mongoose.Schema({
     titre: { type: String, required: true },
@@ -7,8 +6,7 @@ const examenSchema = new mongoose.Schema({
     public: { type: String, required: true },
     uuid: { type: String, required: true, unique: true },
     dateCreation: { type: Date, default: Date.now },
-    questions: { type: [questionSchema], default: [] }
-   
+    questions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }]
 });
 
 // Méthode virtuelle pour générer le lien d'accès complet

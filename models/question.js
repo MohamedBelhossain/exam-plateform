@@ -13,10 +13,10 @@ const questionSchema = new mongoose.Schema({
   tolerance: { type: Number }, 
 
   // Commun
-  points: Number,            
+  points: { type: Number, required: true },  
+  duree: { type: Number, required: true },   
   media: { type: String, default: null },
 });
 
 const Question = mongoose.model('Question', questionSchema);
 module.exports = Question;
-

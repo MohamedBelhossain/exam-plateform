@@ -29,6 +29,15 @@ router.get('/examens/:uuid/add-questions', enseignantController.renderAddQuestio
 
 // ✅ Route POST pour ajouter une question (déléguée au contrôleur)
 router.post('/examens/:uuid/add-questions', enseignantController.addQuestionsToExam);
+// Modifier une question
+
+router.post('/examens/:uuid/update-question/:questionId',enseignantController.updateQuestion);
+
+
+// Supprimer une question
+router.delete('/examens/:uuid/delete-question/:questionId',enseignantController.deleteQuestion);
+router.post('/examens/:uuid/delete-question/:questionId',enseignantController.deleteQuestion);
+
 
 module.exports = router;
 

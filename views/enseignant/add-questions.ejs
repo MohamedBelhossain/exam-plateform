@@ -1,5 +1,5 @@
+<link rel="stylesheet" href="/css/add-questions.css">
 <h2>Ajouter des questions à l'examen</h2>
-
 <div class="exam-info">
     <h3><%= exam.titre %></h3>
     <p><%= exam.description %></p>
@@ -60,7 +60,16 @@
         <input type="number" name="points" id="points" min="1" value="1" required class="form-control">
     </div>
 
-    <button type="submit" class="btn-primary">Ajouter la question</button>
+    <div class="form-group">
+        <label for="duree">Durée (en secondes) :</label>
+        <input type="number" name="duree" id="duree" min="1" value="60" required class="form-control">
+    </div>
+
+    <input type="hidden" name="questionId" id="questionId" value="">
+    <div class="form-buttons">
+        <button type="submit" id="add-button" class="btn-primary">Ajouter la question</button>
+        <button type="button" id="cancel-edit" class="btn-secondary" style="display:none;">Annuler la modification</button>
+    </div>
 </form>
 
 <% if (exam.questions && exam.questions.length > 0) { %>
@@ -68,19 +77,33 @@
         <h3>Questions déjà ajoutées :</h3>
         <ul>
             <% exam.questions.forEach((q, index) => { %>
-                <li class="question-item">
+                <li class="question-item" data-id="<%= q._id %>">
                     <div class="question-header">
                         <strong><%= index + 1 %>.</strong> <%= q.enonce %> 
                         <span class="question-meta">
-                            <%= q.type ? q.type.toUpperCase() : 'TYPE NON DÉFINI' %> - <%= q.points %> points
+                            <%= q.type ? q.type.toUpperCase() : 'TYPE NON DÉFINI' %> 
+                            - <%= q.points %> points 
+                            - <%= q.duree %> secondes
                         </span>
                     </div>
+
+                    <% if (q.media) { %>
+                        <div class="question-media">
+                            <% if (q.media.includes('image')) { %>
+                                <img src="<%= q.media %>" alt="Image de la question" class="question-image">
+                            <% } else if (q.media.includes('audio')) { %>
+                                <audio controls src="<%= q.media %>" class="question-audio"></audio>
+                            <% } else if (q.media.includes('video')) { %>
+                                <video controls src="<%= q.media %>" class="question-video"></video>
+                            <% } %>
+                        </div>
+                    <% } %>
 
                     <% if (q.type === 'qcm') { %>
                         <ul class="choix-list">
                             <% q.choix.forEach((choix) => { %>
-                                <li class="<%= choix === q.bonneReponse ? 'correct-answer' : '' %>">
-                                    <%= choix %> <%= choix === q.bonneReponse ? '✓' : '' %>
+                                <li class="<%= q.bonneReponse.includes(choix) ? 'correct-answer' : '' %>">
+                                    <%= choix %> <%= q.bonneReponse.includes(choix) ? '✓' : '' %>
                                 </li>
                             <% }); %>
                         </ul>
@@ -90,254 +113,15 @@
                             <div class="tolerance"><strong>Tolérance :</strong> <%= q.tolerance %>%</div>
                         <% } %>
                     <% } %>
+
+                    <div class="question-actions">
+                        <button class="btn-edit" onclick="editQuestion('<%= q._id %>')">Modifier</button>
+                        <button class="btn-delete" onclick="deleteQuestion('<%= q._id %>')">Supprimer</button>
+                    </div>
                 </li>
             <% }); %>
         </ul>
     </div>
 <% } %>
+<script src="/javascript/add-questions.js"></script>
 
-<!-- Styles -->
-<style>
-    /* Global styling */
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f9f9f9;
-        color: #333;
-    }
-
-    h2 {
-        font-size: 1.8rem;
-        color: #444;
-        margin-bottom: 1rem;
-    }
-
-    h3 {
-        font-size: 1.4rem;
-        color: #007bff;
-    }
-
-    .form-group {
-        margin-bottom: 1.2rem;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 0.75rem;
-        margin-top: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        background-color: #fff;
-        box-sizing: border-box;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        color: white;
-        padding: 0.8rem 1.2rem;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056b3;
-    }
-
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-        padding: 0.8rem 1.2rem;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .btn-secondary:hover {
-        background-color: #5a6268;
-    }
-
-    .choix-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .choix-input {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-    }
-
-    .choix-input input {
-        flex: 1;
-    }
-
-    .btn-remove {
-        background-color: red;
-        color: white;
-        border: none;
-        padding: 0.25rem 0.5rem;
-        cursor: pointer;
-        border-radius: 4px;
-    }
-
-    .questions-list {
-        margin-top: 2rem;
-    }
-
-    .question-item {
-        margin-bottom: 1.2rem;
-        padding: 1rem;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        background-color: #fff;
-    }
-
-    .question-header {
-        font-weight: bold;
-    }
-
-    .question-meta {
-        font-size: 0.9rem;
-        color: #555;
-    }
-
-    .correct-answer {
-        color: green;
-    }
-
-    .tolerance {
-        margin-top: 0.5rem;
-        font-style: italic;
-        color: gray;
-    }
-
-    .form-group.mt-3 {
-        margin-top: 1rem;
-    }
-
-    .percentage-display {
-        font-weight: bold;
-    }
-
-    /* Responsive design */
-    @media (max-width: 768px) {
-        .form-control {
-            padding: 0.5rem;
-        }
-
-        .btn-primary, .btn-secondary {
-            padding: 0.6rem 1rem;
-        }
-    }
-</style>
-
-<script>
-    const typeSelect = document.getElementById('type');
-    const qcmFields = document.getElementById('qcm-fields');
-    const directeFields = document.getElementById('directe-fields');
-    const choixContainer = document.getElementById('choix-container');
-    const addChoixBtn = document.getElementById('add-choix-btn');
-    const bonneReponseSelect = document.getElementById('bonneReponse');
-    const bonneReponseDirecte = document.getElementById('bonneReponseDirecte');
-    const toleranceInput = document.getElementById('tolerance');
-    const toleranceDisplay = document.getElementById('tolerance-percentage');
-
-    toleranceInput.addEventListener('input', () => {
-        const toleranceValue = toleranceInput.value;
-        toleranceDisplay.textContent = `${toleranceValue}%`;
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-        toggleQuestionFields();
-        updateBonneReponseOptions();
-    });
-
-    typeSelect.addEventListener('change', () => {
-        toggleQuestionFields();
-    });
-
-    function toggleQuestionFields() {
-        const isQcm = typeSelect.value === 'qcm';
-        qcmFields.style.display = isQcm ? 'block' : 'none';
-        directeFields.style.display = isQcm ? 'none' : 'block';
-
-        if (isQcm) {
-            bonneReponseDirecte.value = '';
-        } else {
-            bonneReponseSelect.innerHTML = '<option value="">Sélectionnez la bonne réponse</option>';
-        }
-    }
-
-    addChoixBtn.addEventListener('click', () => {
-        const choixInputs = choixContainer.querySelectorAll('input');
-        const choixCount = choixInputs.length;
-
-        const lastInput = choixInputs[choixCount - 1];
-        if (lastInput && lastInput.value.trim() === '') {
-            alert("Veuillez remplir le choix précédent avant d'en ajouter un nouveau.");
-            return;
-        }
-
-        const div = document.createElement('div');
-        div.className = 'choix-input';
-        div.innerHTML = ` 
-            <input type="text" name="choix[]" placeholder="Choix ${choixCount + 1}" class="form-control">
-            <button type="button" class="btn-remove" onclick="removeChoix(this)">X</button>
-        `;
-        choixContainer.appendChild(div);
-        updateBonneReponseOptions();
-    });
-
-    function removeChoix(button) {
-        if (choixContainer.children.length <= 2) {
-            alert("Une question QCM doit avoir au moins 2 choix.");
-            return;
-        }
-        button.parentElement.remove();
-        updateBonneReponseOptions();
-    }
-
-    function updateBonneReponseOptions() {
-        const choixInputs = choixContainer.querySelectorAll('input');
-        bonneReponseSelect.innerHTML = '<option value="">Sélectionnez la bonne réponse</option>';
-        
-        choixInputs.forEach((input, index) => {
-            if (input.value.trim() !== '') {
-                const option = document.createElement('option');
-                option.value = input.value;
-                option.textContent = input.value;
-                bonneReponseSelect.appendChild(option);
-            }
-        });
-    }
-
-    document.querySelector('form').addEventListener('submit', (event) => {
-        const isQcm = typeSelect.value === 'qcm';
-        
-        if (isQcm) {
-            const choixInputs = choixContainer.querySelectorAll('input');
-            const nonEmptyChoices = Array.from(choixInputs).filter(input => input.value.trim() !== '');
-
-            if (nonEmptyChoices.length < 2) {
-                event.preventDefault();
-                alert("Une question QCM doit comporter au moins 2 choix.");
-            }
-
-            if (!bonneReponseSelect.value) {
-                event.preventDefault();
-                alert("Veuillez sélectionner la bonne réponse.");
-            }
-        } else {
-            if (!bonneReponseDirecte.value.trim()) {
-                event.preventDefault();
-                alert("Veuillez entrer la réponse correcte.");
-            }
-            if (toleranceInput.value < 0) {
-                event.preventDefault();
-                alert("La tolérance doit être positive.");
-            }
-        }
-    });
-</script>
