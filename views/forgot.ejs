@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réinitialisation Mots de passe</title>
+    <link rel="stylesheet" href="/ccs/forgot.css">
+    <script src="/javascript/forgot.js"></script>
+</head>
+<body>
+  <div class="base">
+    <div class="container">
+        <h1>Réinitialisation Mot de passe </h1>
+        
+        
+            <div class="form-group">
+                <input 
+                type="email"  
+                id="email" 
+                name="email" 
+                required
+                placeholder="exemple@domaine.com"
+                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+            >
+            <label for="email">Email</label>
+            </div>
+            
+            <button type="submit">
+                <span class="btn-text">Continuer</span>
+                <div class="loader"></div>
+            </button>
+        </form>
+
+        <div class="success" id="successMessage">
+            <p> class="terms"le mots de passe est mis a jouer </p>
+        </div>
+
+        <div class="terms">
+            Retoure a la page  <a href="connexion">connexion</a>
+        </div>
+
+    </div>
+ </div>
+</body>
+</html>

@@ -1,84 +1,50 @@
-
-const express = require("express");
+const express = require('express');
+const expressLayouts = require('express-ejs-layouts');
 const app = express();
-const expressLayouts = require("express-ejs-layouts");
-const methodOverride = require('method-override');
 
-const cors= require('cors');
-app.use(cors());
-app.use(express.json());
+
+// Configuration EJS
+app.use(expressLayouts);
+app.set('view engine', 'ejs');
+app.set('layout', 'layouts/layout'); // Layout par défaut
+app.set('views',__dirname + '/views'); // Chemin absolu vers le dossier views
+
+// Middleware
+app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 
-// 2. Middleware method-override ensuite (avec de multiples méthodes de détection)
-app.use(methodOverride('_method')); // Pour les requêtes query string comme ?_method=DELETE
-app.use(methodOverride(function(req, res) {
-  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
-    const method = req.body._method;
-    delete req.body._method;
-    return method;
-  }
-}));
 
-// Configuration de multer pour traiter les formulaires multipart/form-data
-const multer = require('multer');
-const upload = multer(); // Pour gérer les formulaires multipart/form-data
 
-// Middleware pour les formulaires multipart qui contiennent _method
-app.use((req, res, next) => {
-  if (req.is('multipart/form-data') && req.body && req.body._method) {
-    req.method = req.body._method.toUpperCase();
-    console.log(`Méthode modifiée via multipart: ${req.method}`);
-  }
-  next();
+
+
+// Routes principales
+app.get('/accueil', (req, res) => res.render('accueil'));
+app.get('/main', (req, res) => res.render('main'));
+app.get('/about', (req, res) => res.render('about'));
+app.get('/config', (req, res) => res.render('config'));
+app.get('/connexion', (req, res) => res.render('connexion'));
+app.get('/contact', (req, res) => res.render('contact'));
+app.get('/forgot', (req, res) => res.render('forgot'));
+app.get('/inscrire', (req, res) => res.render('inscrire'));
+app.get('/no-pas', (req, res) => res.render('no.pas'));
+app.get('/verification-email', (req, res) => res.render('verification_email'));
+
+
+
+
+app.use((req, res) => {
+    res.status(404).render('404', { 
+        title: 'Page introuvable' // Important pour le titre
+    });
 });
 
 
+// Gestion des erreurs 404
+app.use((req, res) => res.status(404).render('404'));
 
-const enseignantRouter = require("./routes/enseignant"); 
-const etudiantRouter = require("./routes/etudiant"); 
-const authRouter= require("./routes/auth");
-
-app.use("/enseignant", enseignantRouter);  
-app.use("/etudiant", etudiantRouter);  
-app.use("/auth",authRouter);
-
-// Importation du contrôleur d'examen pour la route publique
-const examController = require('./controllers/enseignant');
-
-// Route publique pour accéder aux examens par UUID
-app.get("/examen/:uuid", examController.getExamByUUID);
-
-app.set("view engine", "ejs");
-app.set("views", __dirname + "/views");
-app.set("layout", "layouts/layout");
-
-
-app.use(expressLayouts);
-app.use(express.static("public"));
-
-require('dotenv').config();
-
-const mongoose = require('mongoose');
-mongoose.connect(process.env.DATABASE_URL)
-  .then(() => {
-    console.log("Connected to MongoDB Atlas!");
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB Atlas:", error);
-  });
-  
-  // Gestionnaire d'erreur 404 pour les routes non trouvées
-  app.use((req, res, next) => {
-    res.status(404).send(`
-      <h1>Page non trouvée</h1>
-      <p>L'URL demandée n'existe pas: ${req.url}</p>
-      <a href="/enseignant">Retour à la page principale</a>
-    `);
-  });
-     
-app.listen(process.env.PORT || 3000, () => {
-  console.log("Server is running...");
-});
+// Démarrage du serveur
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Serveur démarré sur http://localhost:${PORT}`));
 
 
 

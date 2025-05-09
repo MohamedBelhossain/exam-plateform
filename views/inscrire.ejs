@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire d'Inscription</title>
+    <link rel="stylesheet" href="/css/inscri.css">
+</head>
+<body>
+    
+        <!-- ... vos champs de formulaire ... -->
+    
+    <div class="base">
+        <div class="login-container">
+            <h2>Inscription</h2>
+
+                <div class="form-group">
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required
+                        placeholder="exemple@domaine.com"
+                        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+                    >
+                    <label for="email">Email</label>
+                </div>
+
+
+
+
+
+                <div class="form-group">
+                    <input type="text" 
+                    id="nom" 
+                    name="nom" 
+                    required>
+                    <label>Nom</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" required>
+                    <label >Prénom</label>
+                </div>
+
+                <div class="form-group">
+                    <input 
+                        type="date" 
+                        id="naissance" 
+                        name="naissance" 
+                        required
+                        placeholder="Date de naissance"
+                    >
+                    <label for="naissance">Date de naissance</label>
+                </div>
+
+                <div class="form-group">
+                    <select required>
+                        <option value="" disabled selected></option>
+                        <option value="homme">Homme</option>
+                        <option value="femme">Femme</option>
+                    </select>
+                    <label for ="sexe">Sexe</label>
+                </div>
+
+
+                <div class="form-group">
+                    <input type="text" required>
+                    <label>Filiere</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" required>
+                    <label >Etablissement</label>
+                </div>
+
+            
+                <button 
+                 type="submit"
+                 class="login-btn"
+                 >continue</button>
+                
+                <div class="extra-links">
+                    <a href="connexion">Déjà un compte ? Connectez-vous</a>
+                </div>
+            
+        </div>
+    </div>
+    
+</form>
+<script src="/javascript/inscri.js"></script>
+
+
+</body>
+</html>

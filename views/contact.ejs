@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Daily UI #028</title>
+    <link rel="stylesheet" href="/css/contacte.css">
+    <script src="/javascript/contacte.js"></script>
+</head>
+<body>
+    <div class="base">
+        <div class="connexion">
+            <h2>Contacte</h2>
+            <form>
+
+                <div class="form-group">
+                    <input type="text" required>
+                    <label>Nom</label>
+                </div>
+
+
+                <div class="form-group">
+                    <input 
+                        type="email"  
+                        id="email" 
+                        name="email" 
+                        required
+                        placeholder="exemple@domaine.com"
+                        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+                    >
+                    <label for="email">Email</label>
+                </div>
+
+                <div class="form-group">
+                    <textarea id="message" required placeholder=" "></textarea>
+                    <label for="message">Message</label>
+                </div>
+
+                <button type="submit" class="login-btn">envoyer</button>
+                
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

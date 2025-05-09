@@ -1,0 +1,230 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+
+:root {
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --secondary-color:rgb(206, 25, 25);
+    --dark-bg:rgb(0, 0, 0);
+    --light:rgb(255, 255, 255);
+    --glass-effect: rgba(255, 255, 255, 0.05);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    background: var(--dark-bg);;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.base {
+    position: relative;
+    border-radius: 20px;
+    padding: 50px;
+    transition: var(--transition);
+    cursor: pointer;
+    overflow: hidden;
+    border: 1px solid var(--light) ;
+    box-shadow:
+    0 15px 35px var(--secondary-color), /* ظل خارجي */
+    inset 0 0 10px var(--light); /* ظل داخلي */
+    animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    transition: var(--transition);
+    animation: Mohamed 3s ease-in-out infinite;
+}
+
+@keyframes slideUp {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes Mohamed {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+.base::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+        transparent 20%,
+        var(--secondary-color) 50%,
+        transparent 80%
+    );
+    animation: rotate 4s linear infinite;
+}
+
+.base:hover {
+    transform: translateY(-10px);
+}
+
+.password-box {
+    position: relative;
+    z-index: 1;
+    background: var(--dark-bg);
+    padding: 50px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    margin: 0;
+}
+
+
+h2 {
+    color: var(--light);
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1.8em;
+    position: relative;
+}
+
+h2::after {
+    content: '';
+    display: block;
+    width: 100px;
+    height: 3px;
+    background: var(--secondary-color);
+    margin: 0.5rem auto;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+input {
+    width: 400px;
+    padding: 10px;
+    border: 2px solid var(--light);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: var(--transition);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--light);
+    appearance: none;
+}
+
+input:focus {
+    border-color: var(--secondary-color);
+    outline: none;
+    box-shadow: 0 0 15px var(--secondary-color);
+}
+
+label {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color:var(--light);
+    pointer-events: none;
+    transition: var(--transition);
+    padding: 0 0.3rem;
+}
+
+input:focus ~ label,
+input:valid ~ label {
+    top: -10px;
+    left: 5px;
+    font-size: 12px;
+    color: var(--secondary-color);
+}
+.rules {
+    margin: 0.5rem 0 1rem; /* ↑ → ↓ */
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.rules span {
+    font-size: 0.85rem;
+    color:var(--light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.rules span::before {
+    content: '✖';
+    color: red;
+}
+
+.rules span.valid {
+    color:rgb(51, 213, 121);
+}
+
+.rules span.valid::before {
+    content: '✓';
+    color:rgb(51, 213, 121);
+}
+
+.password-strength {
+    margin: 1rem 0;
+    height: 4px;
+    background: #eee;
+    border-radius: 2px;
+    position: relative;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.strength-text {
+    position: absolute;
+    right: 0;
+    top: 6px;
+    font-size: 0.8rem;
+    color:var(--light);
+}
+
+.btn {
+    width: 100%;
+    padding: 1rem;
+    background:var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    color : var(--light);
+    background: var(--dark-bg);
+    box-shadow: 0 0 25px var(--secondary-color);
+    transform: scale(1.05);
+}
+
+.error {
+    color:red;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    text-align: center;
+    display: none;
+}
+
+.success {
+    color:rgb(51, 213, 121);
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    text-align: center;
+    display: none;
+}

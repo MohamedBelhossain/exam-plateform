@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification Email</title>
+    <link rel="stylesheet" href="/css/verifivation_email.css">
+</head>
+<body>
+    <div class="verification-box">
+        <h2>Vérification par Code</h2>
+        <p>Entrez le code reçu par email</p>
+        
+        <div class="code-inputs">
+            <input type="text" class="code-input" maxlength="1">
+            <input type="text" class="code-input" maxlength="1">
+            <input type="text" class="code-input" maxlength="1">
+            <input type="text" class="code-input" maxlength="1">
+            <input type="text" class="code-input" maxlength="1">
+            <input type="text" class="code-input" maxlength="1">
+        </div>
+
+        <button onclick="verifyCode()" >Vérifier</button>
+        
+        <p class="timer">Temps restant : <span id="countdown">10:00</span></p>
+        <p class="error" id="error-message"></p>
+        <p class="success" id="success-message"></p>
+    </div>
+
+    <script src="/javascript/verifivation_email.js"></script>
+    
+
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.89/build/spline-viewer.js"></script>
+    <spline-viewer class="split" url="https://prod.spline.design/XhFvUepIKNAsOK92/scene.splinecode"></spline-viewer>
+</body>
+</html> 
