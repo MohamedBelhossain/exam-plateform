@@ -11,6 +11,7 @@ const questionIdInput = document.getElementById('questionId');
 const addButton = document.getElementById('add-button');
 const cancelEditButton = document.getElementById('cancel-edit');
 const form = document.querySelector('form');
+const examUuid = document.querySelector('form').dataset.examUuid;
 
 toleranceInput.addEventListener('input', () => {
     const toleranceValue = toleranceInput.value;
@@ -83,17 +84,24 @@ function updateBonneReponseOptions() {
 
 // Fonction pour préremplir le formulaire avec les données d'une question existante
 function editQuestion(questionId) {
+    console.log(`Edit question triggered for ID: ${questionId}`);
+    
     // Reset form first
     resetForm();
     
     // Trouver la question dans le DOM
     const questionItem = document.querySelector(`.question-item[data-id="${questionId}"]`);
-    if (!questionItem) return;
+    if (!questionItem) {
+        console.error(`Question item with ID ${questionId} not found`);
+        return;
+    }
     
     // Récupérer les données de la question
     const questionHeader = questionItem.querySelector('.question-header');
     const enonceText = questionHeader.innerHTML.split('</strong>')[1].split('<span')[0].trim();
     const type = questionItem.querySelector('.question-meta').innerText.includes('QCM') ? 'qcm' : 'directe';
+    
+    console.log(`Question type: ${type}, Enonce: ${enonceText.substring(0, 30)}...`);
     
     // Extraction des points et durée avec regex
     const metaText = questionItem.querySelector('.question-meta').innerText;
@@ -102,6 +110,8 @@ function editQuestion(questionId) {
     
     const points = pointsMatch ? parseInt(pointsMatch[1]) : 1;
     const duree = dureeMatch ? parseInt(dureeMatch[1]) : 60;
+    
+    console.log(`Points: ${points}, Durée: ${duree}`);
     
     // Remplir le formulaire
     document.getElementById('enonce').value = enonceText;
@@ -112,6 +122,7 @@ function editQuestion(questionId) {
     if (type === 'qcm') {
         // Récupérer les choix
         const choixElements = questionItem.querySelectorAll('.choix-list li');
+        console.log(`Found ${choixElements.length} choices for QCM question`);
         
         // Vider le conteneur de choix actuel
         choixContainer.innerHTML = '';
@@ -120,6 +131,8 @@ function editQuestion(questionId) {
         choixElements.forEach((choixEl, index) => {
             const choixText = choixEl.innerText.replace('✓', '').trim();
             const isCorrect = choixEl.classList.contains('correct-answer');
+            
+            console.log(`Choice ${index + 1}: ${choixText} (correct: ${isCorrect})`);
             
             const div = document.createElement('div');
             div.className = 'choix-input';
@@ -134,6 +147,7 @@ function editQuestion(questionId) {
                 setTimeout(() => {
                     updateBonneReponseOptions();
                     bonneReponseSelect.value = choixText;
+                    console.log(`Set correct answer to: ${choixText}`);
                 }, 100);
             }
         });
@@ -145,6 +159,8 @@ function editQuestion(questionId) {
         const toleranceEl = questionItem.querySelector('.tolerance');
         const toleranceMatch = toleranceEl ? toleranceEl.innerText.match(/(\d+)%/) : null;
         const tolerance = toleranceMatch ? parseInt(toleranceMatch[1]) : 0;
+        
+        console.log(`Direct question answer: ${bonneReponse}, tolerance: ${tolerance}%`);
         
         bonneReponseDirecte.value = bonneReponse;
         toleranceInput.value = tolerance;
@@ -159,52 +175,59 @@ function editQuestion(questionId) {
     addButton.textContent = 'Mettre à jour la question';
     cancelEditButton.style.display = 'block';
     
-    // Changer l'action du formulaire
-    form.setAttribute('method', 'POST');
-    form.setAttribute('action', `/enseignant/examens/<%= exam.uuid %>/update-question/${questionId}`);
+    // Changer l'action du formulaire pour update
+    const formAction = `/enseignant/examens/${examUuid}/update-question/${questionId}`;
+    console.log(`Setting form action to: ${formAction}`);
+    form.setAttribute('action', formAction);
     
     // Ajouter un champ caché pour indiquer que c'est une mise à jour (pour le traitement côté serveur)
-    const methodField = document.createElement('input');
-    methodField.type = 'hidden';
-    methodField.name = '_method';
+    let methodField = form.querySelector('input[name="_method"]');
+    if (!methodField) {
+        methodField = document.createElement('input');
+        methodField.type = 'hidden';
+        methodField.name = '_method';
+        form.appendChild(methodField);
+    }
     methodField.value = 'PUT';
-    form.appendChild(methodField);
+    console.log('Added _method=PUT field to form');
     
     // Scroll to form
     form.scrollIntoView({ behavior: 'smooth' });
+    console.log('Form prepared for question update');
 }
 
 // Fonction pour supprimer une question
 function deleteQuestion(questionId) {
-if (confirm('Êtes-vous sûr de vouloir supprimer cette question ?')) {
-    // Créer un formulaire temporaire pour envoyer la requête DELETE
-    const deleteForm = document.createElement('form');
-    deleteForm.method = 'POST';
-    deleteForm.action = `/enseignant/examens/<%= exam.uuid %>/delete-question/${questionId}`;
-    
-    // Ajouter un champ caché pour indiquer que c'est une suppression
-    const methodField = document.createElement('input');
-    methodField.type = 'hidden';
-    methodField.name = '_method';
-    methodField.value = 'DELETE';
-    deleteForm.appendChild(methodField);
-    
-    // S'assurer que l'enctype est correct
-    deleteForm.setAttribute('enctype', 'application/x-www-form-urlencoded');
-    
-    // Ajouter le formulaire au document et le soumettre
-    document.body.appendChild(deleteForm);
-    
-    // Log pour debug
-    console.log('Formulaire de suppression soumis:', deleteForm);
-    
-    // Soumettre le formulaire et attendre que la suppression soit traitée
-    deleteForm.submit();
-    
-    // Empêcher les clics multiples
-    return false;
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette question ?')) {
+        // Créer un formulaire temporaire pour envoyer la requête DELETE
+        const deleteForm = document.createElement('form');
+        deleteForm.method = 'POST';
+        deleteForm.action = `/enseignant/examens/${examUuid}/delete-question/${questionId}`;
+        
+        // Ajouter un champ caché pour indiquer que c'est une suppression
+        const methodField = document.createElement('input');
+        methodField.type = 'hidden';
+        methodField.name = '_method';
+        methodField.value = 'DELETE';
+        deleteForm.appendChild(methodField);
+        
+        // S'assurer que l'enctype est correct
+        deleteForm.setAttribute('enctype', 'application/x-www-form-urlencoded');
+        
+        // Ajouter le formulaire au document et le soumettre
+        document.body.appendChild(deleteForm);
+        
+        // Log pour debug
+        console.log('Formulaire de suppression soumis:', deleteForm);
+        
+        // Soumettre le formulaire et attendre que la suppression soit traitée
+        deleteForm.submit();
+        
+        // Empêcher les clics multiples
+        return false;
+    }
 }
-}
+
 // Fonction pour réinitialiser le formulaire
 function resetForm() {
     form.reset();
@@ -212,7 +235,7 @@ function resetForm() {
     addButton.textContent = 'Ajouter la question';
     cancelEditButton.style.display = 'none';
     form.setAttribute('method', 'POST');
-    form.setAttribute('action', `/enseignant/examens/<%= exam.uuid %>/add-questions`);
+    form.setAttribute('action', `/enseignant/examens/${examUuid}/add-questions`);
     
     // Supprimer le champ _method s'il existe
     const methodField = form.querySelector('input[name="_method"]');

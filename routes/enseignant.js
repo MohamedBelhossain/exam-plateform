@@ -5,7 +5,9 @@ const enseignantController = require('../controllers/enseignant');
 // Route principale
 router.get("/", (req, res) => {
     res.render("enseignant/enseignant");
+
 });
+
 
 router.get('/parametres', (req, res) => {
     res.render('enseignant/parametres');

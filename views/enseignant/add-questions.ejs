@@ -6,7 +6,7 @@
     <p><strong>Public:</strong> <%= exam.public %></p>
 </div>
 
-<form action="/enseignant/examens/<%= exam.uuid %>/add-questions" method="POST" enctype="multipart/form-data" class="question-form">
+<form action="/enseignant/examens/<%= exam.uuid %>/add-questions" method="POST" enctype="multipart/form-data" class="question-form" data-exam-uuid="<%= exam.uuid %>">
     <div class="form-group">
         <label for="enonce">Énoncé :</label>
         <textarea name="enonce" id="enonce" required class="form-control"></textarea>
@@ -71,7 +71,6 @@
         <button type="button" id="cancel-edit" class="btn-secondary" style="display:none;">Annuler la modification</button>
     </div>
 </form>
-
 <% if (exam.questions && exam.questions.length > 0) { %>
     <div class="questions-list">
         <h3>Questions déjà ajoutées :</h3>

@@ -1,7 +1,8 @@
 const Exam = require('../models/examen');
 const Question = require('../models/question');
+const User = require('../models/user');
 const { v4: uuidv4 } = require('uuid');
-
+const mongoose = require('mongoose');
 // Fonction pour créer un nouvel examen
 const createExam = async (req, res) => {
     try {
@@ -293,7 +294,7 @@ const getExamByUUID = async (req, res) => {
         // URL relatif pour la cohérence
         const lienComplet = `/enseignant/examens/${uuid}/add-questions`;
         
-        res.render('examDetail', {
+        res.render('exam-espace', {
             exam: exam.toJSON(),
             lienComplet
         });
@@ -318,6 +319,51 @@ const getAllExams = async (req, res) => {
         res.json(examsWithLinks);
     } catch (error) {
         res.status(500).json({ message: 'Erreur lors de la récupération des examens', error: error.message });
+    }
+};
+exports.submitExam = async (req, res) => {
+    const { examId, answers, geolocalization } = req.body;
+
+    try {
+        // Fetch the exam by ID
+        const exam = await Exam.findById(examId);
+        if (!exam) {
+            return res.status(404).send('Exam not found');
+        }
+
+        // Calculate the score based on the answers (this could be customized to match your scoring system)
+        let score = 0;
+        exam.questions.forEach(question => {
+            const answer = answers[question._id];
+            if (question.type === 'qcm') {
+                if (answer === question.correctAnswer) {
+                    score += question.points;
+                }
+            } else if (question.type === 'direct') {
+                if (answer.trim().toLowerCase() === question.correctAnswer.trim().toLowerCase()) {
+                    score += question.points;
+                }
+            }
+        });
+
+        // Save or process the data (e.g., store the score, geolocation, etc.)
+        const studentData = {
+            examId: examId,
+            answers: answers,
+            geolocalization: JSON.parse(geolocalization),
+            score: score,
+        };
+
+        // Save the results to a User's or a separate ExamResult model (customize as needed)
+        await User.updateOne({ _id: req.user._id }, { $push: { examResults: studentData } });
+
+        res.status(200).json({
+            message: 'Exam submitted successfully',
+            score: score,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error submitting exam');
     }
 };
 

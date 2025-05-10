@@ -11,11 +11,26 @@ app.set('views',__dirname + '/views'); // Chemin absolu vers le dossier views
 
 
 
+const enseignantRouter = require("./routes/enseignant"); 
+const etudiantRouter = require("./routes/etudiant"); 
+const authRoutes= require("./routes/auth");
+
+app.use("/enseignant", enseignantRouter);  
+app.use("/etudiant", etudiantRouter);  
 
 
 // Middleware
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
+
+
+
+// Route publique pour accéder aux examens par UUID
+app.get("/examen/:uuid", examController.getExamByUUID);
+require('./config/passport'); // Assurez-vous que le fichier de configuration de Passport est chargé
+
+// Utiliser les routes d'authentification
+app.use('/auth', authRoutes);
 
 
 

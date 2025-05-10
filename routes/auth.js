@@ -1,9 +1,11 @@
+ branche-itlouhen-mohamed
 // routes/auth.js
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const { sendVerificationEmail } = require('../utils/emailSender');
 const bcrypt = require('bcrypt'); // Ajout nécessaire pour bcrypt
+
 
 // Enregistrement d'un nouvel utilisateur
 router.post('/register', async (req, res) => {
