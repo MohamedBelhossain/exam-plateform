@@ -44,7 +44,7 @@ function showError(message, fieldId) {
 
 function loginSuccessful() {
     const btn = document.querySelector('.login-btn');
-    btn.textContent = 'تم الدخول بنجاح ✓';
+    btn.textContent = 'Connexion réussie ✓';
     btn.style.backgroundColor = '#00C851';
     
     btn.style.animation = 'bounce 0.6s ease';

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulaire d'Inscription</title>
-    <link rel="stylesheet" href="/css/inscri.css">
+    <link rel="stylesheet" href="css/inscr.css">
 </head>
 <body>
     
@@ -39,7 +39,9 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="text" required>
+                    <input type="text"
+                     required
+                      name="prenom">
                     <label >Prénom</label>
                 </div>
 
@@ -55,7 +57,7 @@
                 </div>
 
                 <div class="form-group">
-                    <select required>
+                    <select required name="sexe" id="sexe">
                         <option value="" disabled selected></option>
                         <option value="homme">Homme</option>
                         <option value="femme">Femme</option>
@@ -65,12 +67,12 @@
 
 
                 <div class="form-group">
-                    <input type="text" required>
+                    <input type="text"  name="filiere"  required>
                     <label>Filiere</label>
                 </div>
 
                 <div class="form-group">
-                    <input type="text" required>
+                    <input type="text" name="etablissement" required>
                     <label >Etablissement</label>
                 </div>
 
@@ -78,7 +80,8 @@
                 <button 
                  type="submit"
                  class="login-btn"
-                 >continue</button>
+                 >continue
+                </button>
                 
                 <div class="extra-links">
                     <a href="connexion">Déjà un compte ? Connectez-vous</a>

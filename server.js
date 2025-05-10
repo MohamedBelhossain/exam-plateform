@@ -9,6 +9,10 @@ app.set('view engine', 'ejs');
 app.set('layout', 'layouts/layout'); // Layout par défaut
 app.set('views',__dirname + '/views'); // Chemin absolu vers le dossier views
 
+
+
+
+
 // Middleware
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
