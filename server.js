@@ -1,37 +1,14 @@
-
-const express = require("express");
+const express = require('express');
+const expressLayouts = require('express-ejs-layouts');
 const app = express();
-const expressLayouts = require("express-ejs-layouts");
-const methodOverride = require('method-override');
 
 
-const cors= require('cors');
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Configuration EJS
+app.use(expressLayouts);
+app.set('view engine', 'ejs');
+app.set('layout', 'layouts/layout'); // Layout par défaut
+app.set('views',__dirname + '/views'); // Chemin absolu vers le dossier views
 
-// 2. Middleware method-override ensuite (avec de multiples méthodes de détection)
-app.use(methodOverride('_method')); // Pour les requêtes query string comme ?_method=DELETE
-app.use(methodOverride(function(req, res) {
-  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
-    const method = req.body._method;
-    delete req.body._method;
-    return method;
-  }
-}));
-
-// Configuration de multer pour traiter les formulaires multipart/form-data
-const multer = require('multer');
-const upload = multer(); // Pour gérer les formulaires multipart/form-data
-
-// Middleware pour les formulaires multipart qui contiennent _method
-app.use((req, res, next) => {
-  if (req.is('multipart/form-data') && req.body && req.body._method) {
-    req.method = req.body._method.toUpperCase();
-    console.log(`Méthode modifiée via multipart: ${req.method}`);
-  }
-  next();
-});
 
 
 const enseignantRouter = require("./routes/enseignant"); 
@@ -41,8 +18,12 @@ const authRoutes= require("./routes/auth");
 app.use("/enseignant", enseignantRouter);  
 app.use("/etudiant", etudiantRouter);  
 
-// Importation du contrôleur d'examen pour la route publique
-const examController = require('./controllers/enseignant');
+
+// Middleware
+app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
+
+
 
 // Route publique pour accéder aux examens par UUID
 app.get("/examen/:uuid", examController.getExamByUUID);
@@ -51,37 +32,38 @@ require('./config/passport'); // Assurez-vous que le fichier de configuration de
 // Utiliser les routes d'authentification
 app.use('/auth', authRoutes);
 
-app.set("view engine", "ejs");
-app.set("views", __dirname + "/views");
-app.set("layout", "layouts/layout");
 
 
-app.use(expressLayouts);
-app.use(express.static("public"));
 
-require('dotenv').config();
 
-const mongoose = require('mongoose');
-mongoose.connect(process.env.DATABASE_URL)
-  .then(() => {
-    console.log("Connected to MongoDB Atlas!");
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB Atlas:", error);
-  });
-  
-  // Gestionnaire d'erreur 404 pour les routes non trouvées
-  app.use((req, res, next) => {
-    res.status(404).send(`
-      <h1>Page non trouvée</h1>
-      <p>L'URL demandée n'existe pas: ${req.url}</p>
-      <a href="/enseignant">Retour à la page principale</a>
-    `);
-  });
-     
-app.listen(process.env.PORT || 3000, () => {
-  console.log("Server is running...");
+// Routes principales
+app.get('/accueil', (req, res) => res.render('accueil'));
+app.get('/main', (req, res) => res.render('main'));
+app.get('/about', (req, res) => res.render('about'));
+app.get('/config', (req, res) => res.render('config'));
+app.get('/connexion', (req, res) => res.render('connexion'));
+app.get('/contact', (req, res) => res.render('contact'));
+app.get('/forgot', (req, res) => res.render('forgot'));
+app.get('/inscrire', (req, res) => res.render('inscrire'));
+app.get('/no-pas', (req, res) => res.render('no.pas'));
+app.get('/verification-email', (req, res) => res.render('verification_email'));
+
+
+
+
+app.use((req, res) => {
+    res.status(404).render('404', { 
+        title: 'Page introuvable' // Important pour le titre
+    });
 });
+
+
+// Gestion des erreurs 404
+app.use((req, res) => res.status(404).render('404'));
+
+// Démarrage du serveur
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Serveur démarré sur http://localhost:${PORT}`));
 
 
 

@@ -8,7 +8,7 @@ const createExam = async (req, res) => {
     try {
         const { titre, description, publicCible } = req.body;
         
-        if (!titre || !description || !publicCible) {
+        if (!titre || !description ||  !publicCible) {
             return res.status(400).json({ message: "Tous les champs sont obligatoires." });
         }
         

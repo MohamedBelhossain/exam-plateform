@@ -1,67 +1,101 @@
-const express=require("express");
-const router=express.Router();
-const passport = require('passport');
-const jwt = require('jsonwebtoken');
-const User = require('../models/user'); 
+ branche-itlouhen-mohamed
+// routes/auth.js
+const express = require('express');
+const router = express.Router();
+const User = require('../models/user');
+const { sendVerificationEmail } = require('../utils/emailSender');
+const bcrypt = require('bcrypt'); // Ajout nécessaire pour bcrypt
 
 
-
-router.post('/login', (req, res, next) => {
-    passport.authenticate('local', { session: false }, (err, user, info) => {
-        if (err || !user) {
-            return res.status(400).json({ message: 'Échec de l\'authentification', info });
-        }
-
-        // Créer un JWT
-        const payload = { userId: user.id };
-        const token = jwt.sign(payload, 'tonSecret', { expiresIn: '1h' });
-
-        return res.json({ message: 'Authentification réussie', token });
-    })(req, res, next);
-});
-
-// Route d'enregistrement (si nécessaire)
+// Enregistrement d'un nouvel utilisateur
 router.post('/register', async (req, res) => {
+  try {
     const { email, password } = req.body;
-
-    try {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Cet email est déjà pris.' });
-        }
-
-        const newUser = new User({ email, password });
-        await newUser.save();
-
-        res.status(201).json({ message: 'Utilisateur créé avec succès.' });
-    } catch (err) {
-        res.status(500).json({ message: 'Erreur serveur' });
-    }
+    
+    const user = new User({ email, password });
+    user.generateVerificationToken();
+    
+    await user.save();
+    await sendVerificationEmail(email, user.verificationToken);
+    
+    res.redirect('/verification-email');
+  } catch (error) {
+    res.status(400).render('inscrire', { error: 'L\'email est déjà utilisé' });
+  }
 });
-// Registe
-  // Logout route
-  router.get("/logout", (req, res) => {
-  
-  });
 
-
-// Middleware pour vérifier le JWT
-function verifyToken(req, res, next) {
-    const token = req.headers['authorization']?.split(' ')[1]; // Récupérer le token à partir de l'en-tête Authorization
-
-    if (!token) {
-        return res.status(403).json({ message: 'Token manquant' });
+// Activation du compte
+router.get('/verify/:token', async (req, res) => {
+  try {
+    const user = await User.findOne({ verificationToken: req.params.token });
+    
+    if (!user) {
+      return res.status(404).render('error', { message: 'Lien invalide' });
     }
+    
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    await user.save();
+    
+    res.redirect('/connexion');
+  } catch (error) {
+    res.status(500).render('error', { message: 'Erreur lors de l\'activation' });
+  }
+});
 
-    jwt.verify(token, 'tonSecret', (err, decoded) => {
-        if (err) {
-            return res.status(403).json({ message: 'Token invalide' });
-        }
-        req.userId = decoded.userId; // Ajouter l'ID de l'utilisateur à la requête pour pouvoir l'utiliser ensuite
-        next();
-    });
-}
+// Connexion utilisateur
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).render('connexion', { error: 'Identifiants incorrects' });
+    }
+    
+    if (!user.isVerified) {
+      return res.render('connexion', { error: 'Veuillez activer votre compte d\'abord' });
+    }
+    
+    // Création de la session
+    req.session.userId = user._id;
+    res.redirect('/main');
+  } catch (error) {
+    res.status(500).render('error', { message: 'Erreur serveur' });
+  }
+});
 
-module.exports = verifyToken;
-module.exports=router;
+// routes/auth.js
 
+// Après une connexion réussie
+req.session.userId = user._id;
+req.session.role = user.role;
+
+// Middleware de vérification
+const requireAuth = (req, res, next) => {
+  if (!req.session.userId) {
+    return res.status(401).redirect('/connexion');
+  }
+  next();
+};
+
+// Route protégée
+app.get('/profile', requireAuth, (req, res) => {
+  res.render('profile', { user: req.session.user });
+});
+
+// Après une connexion réussie
+res.cookie('auth_token', token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  maxAge: 24 * 60 * 60 * 1000, // 1 jour
+  sameSite: 'strict',
+  path: '/'
+});
+
+// Déconnexion
+router.post('/logout', (req, res) => {
+  res.clearCookie('auth_token');
+  res.clearCookie('connect.sid'); // Cookie de session
+  res.redirect('/');
+});
