@@ -14,20 +14,22 @@
         
         <h2>Questions:</h2>
         
-        <!-- Affichage du timer pour chaque question -->
-        <div id="timer-container">
+        <!-- Affichage du timer pour la question actuelle -->
+       <div id="timer-container">
             <p><strong>Temps restant: </strong><span id="timer">00:00</span></p>
         </div>
         
-        <form action="/submit-exam" method="POST" id="exam-form">
+        <form action="/etudiant/submit-exam" method="POST" id="exam-form">
             <input type="hidden" name="examId" value="<%= exam._id %>">
             <input type="hidden" id="total-questions" value="<%= exam.questions ? exam.questions.length : 0 %>">
+            <!-- Champ caché pour stocker les données de géolocalisation -->
+            <input type="hidden" name="geolocalization" id="geoloc-input">
             
             <div id="questions-container">
                 <% if (exam.questions && exam.questions.length > 0) { %>
                     <% exam.questions.forEach(function(question, index) { %>
-                        <!-- Stocker le temps limite dans un champ caché -->
-                        <input type="hidden" id="question-<%= index %>-timer" value="<%= question.tempsLimite || 120 %>">
+                        <!-- Stocker le temps limite en secondes dans un champ caché -->
+                        <input type="hidden" id="question-<%= index %>-timer" value="<%= question.duree %>">
                         <div class="question" id="question-<%= index %>" style=<%= index > 0 ? 'display:none;' : '' %>>
                             <% if (question.media) { %>
                                 <div class="question-media">
@@ -46,7 +48,10 @@
                                 </div>
                             <% } %>
                             
-                            <p class="question-text"><%= index + 1 %>. <%= question.enonce %></p>
+                            <div class="question-header">
+                                <p class="question-text"><%= index + 1 %>. <%= question.enonce %></p>
+                                <p class="question-timer">Temps: <span id="question-<%= index %>-time-display">00:00</span></p>
+                            </div>
                             <p class="question-points"><%= question.points %> points</p>
                             
                             <% if (question.type === 'qcm') { %>
@@ -145,11 +150,28 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
         .question-text {
             font-size: 18px;
             font-weight: 500;
             color: #333;
-            margin-bottom: 10px;
+            flex: 1;
+            margin-right: 15px;
+        }
+        
+        .question-timer {
+            background-color: #f0f7ff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: #4a90e2;
+            font-weight: bold;
+            white-space: nowrap;
         }
         
         .question-points {
@@ -298,166 +320,383 @@
             color: #4a90e2;
             margin-bottom: 20px;
         }
+        
+        /* Style pour la popup de géolocalisation */
+        #geolocation-request {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .geolocation-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        .geolocation-content h2 {
+            margin-bottom: 20px;
+        }
+        
+        .geolocation-content p {
+            margin-bottom: 25px;
+        }
+        
+        #btn-allow-geoloc {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        #btn-allow-geoloc:hover {
+            background-color: #3a7bc8;
+        }
     </style>
     
     <script>
-        // Variables pour gérer l'état des questions et le timer
-        let currentQuestionIndex = 0;
-        let totalQuestions = 0; // Sera défini via une variable injectée
-        let questionTimers = {};
-        let defaultTimePerQuestion = 120; // 2 minutes par défaut par question (en secondes)
-        
-        // Ces variables seront injectées côté serveur avec les données correctes
-        document.addEventListener('DOMContentLoaded', function() {
-            // Récupérer le nombre total de questions depuis un élément caché
-            totalQuestions = parseInt(document.getElementById('total-questions').value) || 0;
-            
-            // Initialiser les timers par défaut pour toutes les questions
-            for (let i = 0; i < totalQuestions; i++) {
-                const timerEl = document.getElementById(`question-${i}-timer`);
-                if (timerEl) {
-                    questionTimers[i] = parseInt(timerEl.value) || defaultTimePerQuestion;
-                } else {
-                    questionTimers[i] = defaultTimePerQuestion;
-                }
-            }
-        });
-        
-        let timerInterval;
-        let formSubmitted = false;
-        
-        // Fonction pour formater le temps (secondes -> MM:SS)
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-        
-        // Démarrer le timer pour une question
-        function startQuestionTimer(questionIndex) {
-            // Arrêter le timer précédent s'il existe
-            if (timerInterval) {
-                clearInterval(timerInterval);
-            }
-            
-            // Réinitialiser l'affichage du timer
-            document.getElementById('timer').textContent = formatTime(questionTimers[questionIndex]);
-            
-            // Configurer et démarrer le nouveau timer
-            let timeRemaining = questionTimers[questionIndex];
-            
-            timerInterval = setInterval(() => {
-                timeRemaining--;
-                
-                // Mettre à jour l'affichage
-                document.getElementById('timer').textContent = formatTime(timeRemaining);
-                
-                // Changer la couleur quand il reste peu de temps
-                if (timeRemaining <= 30) {
-                    document.getElementById('timer').style.color = '#e74c3c';
-                }
-                
-                // Temps écoulé pour cette question
-                if (timeRemaining <= 0) {
-                    clearInterval(timerInterval);
-                    moveToNextQuestion(questionIndex);
-                }
-            }, 1000);
-        }
-    
-        
-        // Fonction pour passer à la question suivante
-        function moveToNextQuestion(currentIndex) {
-            // Cacher la question actuelle
-            document.getElementById(`question-${currentIndex}`).style.display = 'none';
-            
-            // Si c'était la dernière question, afficher l'écran final
-            if (currentIndex >= totalQuestions - 1) {
-                document.getElementById('exam-complete').style.display = 'block';
-                document.getElementById('timer-container').style.display = 'none';
-                if (timerInterval) {
-                    clearInterval(timerInterval);
-                }
-                return;
-            }
-            
-            // Passer à la question suivante
-            currentQuestionIndex = currentIndex + 1;
-            document.getElementById(`question-${currentQuestionIndex}`).style.display = 'block';
-            
-            // Démarrer le timer pour la nouvelle question
-            startQuestionTimer(currentQuestionIndex);
-        }
+// Variables pour gérer l'état des questions et le timer
+let currentQuestionIndex = 0;
+let totalQuestions = 0; // Sera défini via une variable injectée
+let questionTimers = {};
+let defaultTimePerQuestion = 120; // 2 minutes par défaut par question (en secondes)
+let userCoordinates = null; // Variable pour stocker les coordonnées de géolocalisation
 
-        // Gérer les événements de clic sur les boutons "Question suivante"
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialiser la première question et son timer
-            if (totalQuestions > 0) {
-                startQuestionTimer(0);
-            }
-            
-            // Ajouter des écouteurs d'événements pour tous les boutons "Question suivante"
-            const nextButtons = document.querySelectorAll('.btn-next');
-            nextButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const questionIndex = parseInt(this.getAttribute('data-question-index'));
-                    
-                    // Valider si la question a été répondue
-                    const questionElement = document.getElementById(`question-${questionIndex}`);
-                    let answered = false;
-                    
-                    // Vérifier les réponses QCM
-                    const radioInputs = questionElement.querySelectorAll('input[type="radio"]');
-                    radioInputs.forEach(input => {
-                        if (input.checked) {
-                            answered = true;
-                        }
-                    });
-                    
-                    // Vérifier les réponses texte
-                    const textInputs = questionElement.querySelectorAll('input[type="text"]');
-                    textInputs.forEach(input => {
-                        if (input.value.trim() !== '') {
-                            answered = true;
-                        }
-                    });
-                    
-                    // Si la question est répondue, ou si on force le passage
-                    if (answered || confirm('Vous n\'avez pas répondu à cette question. Voulez-vous vraiment passer à la suivante?')) {
-                        moveToNextQuestion(questionIndex);
-                    }
-                });
-            });
-            
-            // Auto-progression pour les questions QCM 
-            const radioInputs = document.querySelectorAll('input[type="radio"]');
-            radioInputs.forEach(input => {
-                input.addEventListener('change', function() {
-                   
-                    // const questionIndex = parseInt(this.getAttribute('data-question-index'));
-                    // setTimeout(() => {
-                    //     moveToNextQuestion(questionIndex);
-                    // }, 1500);
-                });
-            });
-            
-            // Empêcher la double soumission du formulaire
-            document.getElementById('exam-form').addEventListener('submit', function(e) {
-                if (formSubmitted) {
-                    e.preventDefault();
-                    return false;
-                }
-                
-                formSubmitted = true;
-                return true;
-            });
-        });
+// Débogage: Afficher les valeurs des timers au démarrage
+function logTimerValues() {
+    console.log("Valeurs des timers:");
+    for (let i = 0; i < totalQuestions; i++) {
+        const timerEl = document.getElementById(`question-${i}-timer`);
+        if (timerEl) {
+            console.log(`Question ${i+1}: ${timerEl.value} secondes`);
+        } else {
+            console.log(`Question ${i+1}: Élément timer non trouvé`);
+        }
+    }
+}
+
+// Fonction pour demander et enregistrer la géolocalisation
+function demanderGeolocalisation() {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            alert("Votre navigateur ne supporte pas la géolocalisation");
+            reject("Géolocalisation non supportée");
+            return;
+        }
         
-        function exitPage() {
-            if (confirm('Êtes-vous sûr de vouloir quitter l\'examen? Toutes vos réponses seront perdues.')) {
-                window.location.href = "/etudiant";
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                // Succès : on récupère les coordonnées
+                userCoordinates = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    precision: position.coords.accuracy,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Enregistrer les coordonnées dans localStorage
+                localStorage.setItem('examen_geolocalisation', JSON.stringify(userCoordinates));
+                
+                // Mise à jour du champ caché dans le formulaire
+                document.getElementById('geoloc-input').value = JSON.stringify(userCoordinates);
+                
+                resolve(userCoordinates);
+            },
+            (error) => {
+                // Erreur de géolocalisation
+                let message;
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        message = "Vous avez refusé l'accès à la géolocalisation";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        message = "Les informations de localisation sont indisponibles";
+                        break;
+                    case error.TIMEOUT:
+                        message = "La demande de localisation a expiré";
+                        break;
+                    default:
+                        message = "Une erreur inconnue est survenue";
+                }
+                alert(message);
+                reject(message);
+            },
+            {
+                enableHighAccuracy: true, // Demande une précision élevée
+                timeout: 10000,          // Délai maximum de 10 secondes
+                maximumAge: 0            // Pas de cache
+            }
+        );
+    });
+}
+
+// Fonction pour formater le temps (secondes -> MM:SS)
+function formatTime(seconds) {
+    // Vérifier que la valeur est un nombre valide
+    if (isNaN(seconds) || seconds === null || seconds === undefined) {
+        return "00:00"; // Valeur par défaut
+    }
+    
+    // Conversion en nombre et s'assurer que c'est positif
+    seconds = Math.max(0, Number(seconds));
+    
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+let timerInterval;
+let formSubmitted = false;
+
+// Démarrer le timer pour une question
+function startQuestionTimer(questionIndex) {
+    // Arrêter le timer précédent s'il existe
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+    
+    // Récupérer le temps limite pour cette question
+    let timeRemaining;
+    const timerEl = document.getElementById(`question-${questionIndex}-timer`);
+    
+    if (timerEl && timerEl.value && !isNaN(parseInt(timerEl.value))) {
+        timeRemaining = parseInt(timerEl.value);
+        console.log(`Temps défini pour la question ${questionIndex+1}: ${timeRemaining} secondes`);
+    } else if (questionTimers[questionIndex] && !isNaN(questionTimers[questionIndex])) {
+        timeRemaining = questionTimers[questionIndex];
+        console.log(`Temps défini pour la question ${questionIndex+1} depuis questionTimers: ${timeRemaining} secondes`);
+    } else {
+        timeRemaining = defaultTimePerQuestion;
+        console.log(`Temps par défaut pour la question ${questionIndex+1}: ${timeRemaining} secondes`);
+    }
+    
+    // Réinitialiser l'affichage du timer global
+    const timerElement = document.getElementById('timer');
+    if (timerElement) {
+        timerElement.textContent = formatTime(timeRemaining);
+        timerElement.style.color = '#4a90e2'; // Réinitialiser la couleur
+    }
+    
+    // Mettre à jour le timer spécifique à la question
+    const questionTimerDisplay = document.getElementById(`question-${questionIndex}-time-display`);
+    if (questionTimerDisplay) {
+        questionTimerDisplay.textContent = formatTime(timeRemaining);
+    }
+    
+    // Configurer et démarrer le nouveau timer
+    timerInterval = setInterval(() => {
+        timeRemaining--;
+        
+        // Mettre à jour l'affichage du timer global
+        if (timerElement) {
+            timerElement.textContent = formatTime(timeRemaining);
+            // Changer la couleur quand il reste peu de temps
+            if (timeRemaining <= 30) {
+                timerElement.style.color = '#e74c3c';
             }
         }
+        
+        // Mettre à jour le timer spécifique à la question
+        if (questionTimerDisplay) {
+            questionTimerDisplay.textContent = formatTime(timeRemaining);
+            if (timeRemaining <= 30) {
+                questionTimerDisplay.style.color = '#e74c3c';
+            }
+        }
+        
+        // Temps écoulé pour cette question
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            moveToNextQuestion(questionIndex);
+        }
+    }, 1000);
+}
+
+// Fonction pour passer à la question suivante
+function moveToNextQuestion(currentIndex) {
+    // Cacher la question actuelle
+    const currentQuestion = document.getElementById(`question-${currentIndex}`);
+    if (currentQuestion) {
+        currentQuestion.style.display = 'none';
+    }
+    
+    // Si c'était la dernière question, afficher l'écran final
+    if (currentIndex >= totalQuestions - 1) {
+        const examComplete = document.getElementById('exam-complete');
+        if (examComplete) {
+            examComplete.style.display = 'block';
+        }
+        
+        const timerContainer = document.getElementById('timer-container');
+        if (timerContainer) {
+            timerContainer.style.display = 'none';
+        }
+        
+        if (timerInterval) {
+            clearInterval(timerInterval);
+        }
+        return;
+    }
+    
+    // Passer à la question suivante
+    currentQuestionIndex = currentIndex + 1;
+    
+    const nextQuestion = document.getElementById(`question-${currentQuestionIndex}`);
+    if (nextQuestion) {
+        nextQuestion.style.display = 'block';
+    }
+    
+    // Démarrer le timer pour la nouvelle question
+    startQuestionTimer(currentQuestionIndex);
+}
+
+// Créer la fenêtre modale pour la géolocalisation
+function createGeolocationModal() {
+    // Création de la div pour la demande de géolocalisation
+    const geolocDiv = document.createElement('div');
+    geolocDiv.id = 'geolocation-request';
+    
+    const geolocContent = document.createElement('div');
+    geolocContent.className = 'geolocation-content';
+    
+    geolocContent.innerHTML = `
+        <h2>Activation de la géolocalisation</h2>
+        <p>Pour continuer l'examen, merci d'autoriser l'accès à votre position géographique.</p>
+        <p>Cette information est nécessaire pour valider votre participation à l'examen.</p>
+        <button id="btn-allow-geoloc">Autoriser la géolocalisation</button>
+    `;
+    
+    geolocDiv.appendChild(geolocContent);
+    document.body.appendChild(geolocDiv);
+    
+    // Masquer toutes les questions au démarrage
+    for(let i = 0; i < totalQuestions; i++) {
+        const questionEl = document.getElementById(`question-${i}`);
+        if(questionEl) questionEl.style.display = 'none';
+    }
+    
+    // Masquer le timer global jusqu'à ce que la géolocalisation soit approuvée
+    const timerContainer = document.getElementById('timer-container');
+    if(timerContainer) timerContainer.style.display = 'none';
+    
+    // Ajouter l'événement au bouton d'autorisation de géolocalisation
+    document.getElementById('btn-allow-geoloc').addEventListener('click', function() {
+        demanderGeolocalisation()
+            .then(coords => {
+                // Supprimer la div de demande de géolocalisation
+                document.getElementById('geolocation-request').remove();
+                
+                // Afficher la première question et démarrer le timer
+                if (totalQuestions > 0) {
+                    document.getElementById('question-0').style.display = 'block';
+                    if (timerContainer) timerContainer.style.display = 'block';
+                    // Log timer values for debugging
+                    logTimerValues();
+                    startQuestionTimer(0);
+                }
+            })
+            .catch(error => {
+                alert('Vous devez autoriser la géolocalisation pour continuer l\'examen.');
+            });
+    });
+}
+
+// Initialiser et configurer à l'initialisation de la page
+document.addEventListener('DOMContentLoaded', function() {
+    // Récupérer le nombre total de questions
+    totalQuestions = parseInt(document.getElementById('total-questions').value) || 0;
+    console.log(`Nombre total de questions: ${totalQuestions}`);
+    
+    // Initialiser les timers pour chaque question
+    for (let i = 0; i < totalQuestions; i++) {
+        const timerEl = document.getElementById(`question-${i}-timer`);
+        if (timerEl) {
+            const timerValue = parseInt(timerEl.value);
+            if (!isNaN(timerValue)) {
+                questionTimers[i] = timerValue;
+                console.log(`Timer pour question ${i+1} défini à ${timerValue} secondes`);
+            } else {
+                questionTimers[i] = defaultTimePerQuestion;
+                console.log(`Timer pour question ${i+1} défini par défaut à ${defaultTimePerQuestion} secondes`);
+            }
+            
+            // Mettre à jour l'affichage du timer pour cette question
+            const displayEl = document.getElementById(`question-${i}-time-display`);
+            if (displayEl) {
+                displayEl.textContent = formatTime(questionTimers[i]);
+            }
+        } else {
+            console.warn(`Élément timer non trouvé pour la question ${i+1}`);
+            questionTimers[i] = defaultTimePerQuestion;
+        }
+    }
+    
+    // Ajouter les écouteurs d'événements pour les boutons "Question suivante"
+    const nextButtons = document.querySelectorAll('.btn-next');
+    nextButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const questionIndex = parseInt(this.getAttribute('data-question-index'));
+            
+            // Valider si la question a été répondue
+            const questionElement = document.getElementById(`question-${questionIndex}`);
+            let answered = false;
+            
+            // Vérifier les réponses QCM
+            const radioInputs = questionElement.querySelectorAll('input[type="radio"]');
+            radioInputs.forEach(input => {
+                if (input.checked) {
+                    answered = true;
+                }
+            });
+            
+            // Vérifier les réponses texte
+            const textInputs = questionElement.querySelectorAll('input[type="text"]');
+            textInputs.forEach(input => {
+                if (input.value.trim() !== '') {
+                    answered = true;
+                }
+            });
+            
+            // Si la question est répondue, ou si on force le passage
+            if (answered || confirm('Vous n\'avez pas répondu à cette question. Voulez-vous vraiment passer à la suivante?')) {
+                moveToNextQuestion(questionIndex);
+            }
+        });
+    });
+    
+    // Empêcher la double soumission du formulaire
+    document.getElementById('exam-form').addEventListener('submit', function(e) {
+        if (formSubmitted) {
+            e.preventDefault();
+            return false;
+        }
+        
+        formSubmitted = true;
+        return true;
+    });
+    
+    // Créer la fenêtre modale pour demander la géolocalisation
+    createGeolocationModal();
+});
+
+function exitPage() {
+    if (confirm('Êtes-vous sûr de vouloir quitter l\'examen? Toutes vos réponses seront perdues.')) {
+        window.location.href = "/etudiant";
+    }
+}
     </script>
 </body>
 </html>
