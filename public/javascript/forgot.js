@@ -10,7 +10,7 @@ document.querySelector('button').addEventListener('click', async (e) => {
  
     const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
     if (!emailRegex.test(emailInput.value)) {
-        showError('البريد الإلكتروني غير صحيح', emailInput);
+        showError('email incorrect', emailInput);
         return;
     }
 
@@ -34,7 +34,7 @@ document.querySelector('button').addEventListener('click', async (e) => {
         }, 3000);
 
     } catch (error) {
-        showError('حدث خطأ في الإرسال، يرجى المحاولة لاحقاً', emailInput);
+        showError(' error', emailInput);
         loader.style.display = 'none';
         button.querySelector('.btn-text').style.opacity = '1';
         button.disabled = false;

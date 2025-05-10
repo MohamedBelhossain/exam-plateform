@@ -45,7 +45,6 @@ const validateRules = (password) => {
     });
 };
 
-// 5- التحقق من تطابق كلمتي المرور
 const checkPasswordMatch = () => {
     const match = passwordInput.value === confirmInput.value;
     confirmInput.style.borderColor = match ? '#00C851' : '#ff4444';

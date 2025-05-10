@@ -32,8 +32,8 @@ body {
     overflow: hidden;
     border: 1px solid var(--light) ;
     box-shadow:
-    0 15px 35px var(--secondary-color), /* ظل خارجي */
-    inset 0 0 10px var(--light); /* ظل داخلي */
+    0 15px 35px var(--secondary-color), 
+    inset 0 0 10px var(--light); 
     animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
     transition: var(--transition);
     animation: Mohamed 3s ease-in-out infinite;
