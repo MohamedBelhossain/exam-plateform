@@ -293,7 +293,7 @@ const getExamByUUID = async (req, res) => {
         // URL relatif pour la cohérence
         const lienComplet = `/enseignant/examens/${uuid}/add-questions`;
         
-        res.render('examDetail', {
+        res.render('exam-espace', {
             exam: exam.toJSON(),
             lienComplet
         });

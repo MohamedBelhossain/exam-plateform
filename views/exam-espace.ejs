@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= exam.titre %></title>
+</head>
+<body>
+    <div class="container exam-details">
+        <h1><%= exam.titre %></h1>
+        <p><%= exam.description %></p>
+        <p><strong>Public cible: </strong><%= exam.public %></p>
+        <p><strong>Date de création: </strong><%= new Date(exam.dateCreation).toLocaleDateString('fr-FR') %></p>
+        
+        <h2>Questions:</h2>
+        
+        <!-- Affichage du timer pour chaque question -->
+        <div id="timer-container">
+            <p><strong>Temps restant: </strong><span id="timer">00:00</span></p>
+        </div>
+        
+        <form action="/submit-exam" method="POST" id="exam-form">
+            <input type="hidden" name="examId" value="<%= exam._id %>">
+            <input type="hidden" id="total-questions" value="<%= exam.questions ? exam.questions.length : 0 %>">
+            
+            <div id="questions-container">
+                <% if (exam.questions && exam.questions.length > 0) { %>
+                    <% exam.questions.forEach(function(question, index) { %>
+                        <!-- Stocker le temps limite dans un champ caché -->
+                        <input type="hidden" id="question-<%= index %>-timer" value="<%= question.tempsLimite || 120 %>">
+                        <div class="question" id="question-<%= index %>" style=<%= index > 0 ? 'display:none;' : '' %>>
+                            <% if (question.media) { %>
+                                <div class="question-media">
+                                    <p><strong>Fichier joint :</strong></p>
+                                    <% if (question.media.endsWith('.jpg') || question.media.endsWith('.png') || question.media.endsWith('.gif')) { %>
+                                        <img src="<%= question.media %>" alt="Image Media" style="max-width: 300px;">
+                                    <% } else if (question.media.endsWith('.mp3') || question.media.endsWith('.wav')) { %>
+                                        <audio controls>
+                                            <source src="<%= question.media %>" type="audio/mp3">
+                                        </audio>
+                                    <% } else if (question.media.endsWith('.mp4') || question.media.endsWith('.mov')) { %>
+                                        <video controls>
+                                            <source src="<%= question.media %>" type="video/mp4">
+                                        </video>
+                                    <% } %>
+                                </div>
+                            <% } %>
+                            
+                            <p class="question-text"><%= index + 1 %>. <%= question.enonce %></p>
+                            <p class="question-points"><%= question.points %> points</p>
+                            
+                            <% if (question.type === 'qcm') { %>
+                                <div class="options">
+                                    <% question.choix.forEach(function(option) { %>
+                                        <label class="option">
+                                            <input type="radio" name="answers[<%= question._id %>]" value="<%= option %>" class="answer-input" data-question-index="<%= index %>">
+                                            <span class="option-text"><%= option %></span>
+                                        </label>
+                                    <% }); %>
+                                </div>
+                            <% } else { %>
+                                <div class="direct-answer">
+                                    <input type="text" name="answers[<%= question._id %>]" placeholder="Votre réponse" class="answer-input text-input" data-question-index="<%= index %>">
+                                    <button type="button" class="btn-next" data-question-index="<%= index %>">Question suivante</button>
+                                </div>
+                            <% } %>
+
+                            <% if (question.type === 'qcm') { %>
+                                <button type="button" class="btn-next" data-question-index="<%= index %>">Question suivante</button>
+                            <% } %>
+                            
+                            <p class="question-progress">Question <%= index + 1 %> sur <%= exam.questions.length %></p>
+                        </div>
+                    <% }); %>
+                    
+                    <div id="exam-complete" style="display:none;">
+                        <h3>Vous avez terminé toutes les questions!</h3>
+                        <button type="submit" class="btn-submit">Soumettre l'examen</button>
+                    </div>
+                <% } else { %>
+                    <p class="no-questions">Aucune question disponible pour cet examen.</p>
+                <% } %>
+            </div>
+        </form>
+        
+        <div class="actions">
+            <a onclick="exitPage()" class="btn">Retour à l'accueil</a>
+        </div>
+    </div>
+    
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .container h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 10px;
+        }
+        
+        .exam-details p {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 12px;
+        }
+        
+        .exam-details strong {
+            color: #222;
+        }
+        
+        h2 {
+            font-size: 22px;
+            margin: 30px 0 20px;
+            color: #333;
+        }
+        
+        .question {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .question-text {
+            font-size: 18px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .question-points {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .option:hover {
+            background-color: #f0f7ff;
+            border-color: #4a90e2;
+        }
+        
+        .option input[type="radio"] {
+            margin-right: 12px;
+        }
+        
+        .option-text {
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .direct-answer {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .answer-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .answer-input:focus {
+            border-color: #4a90e2;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+        
+        .no-questions {
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .btn-submit, .btn-next {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .btn-submit {
+            display: block;
+            margin: 30px auto;
+        }
+        
+        .btn-next {
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .btn-submit:hover, .btn-next:hover {
+            background-color: #3a7bc8;
+        }
+        
+        .actions {
+            margin-top: 30px;
+            text-align: right;
+        }
+        
+        .btn {
+            background-color: #000000;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            display: inline-block;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background-color: #3f4144;
+        }
+        
+        #timer-container {
+            background-color: #f0f7ff;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #4a90e2;
+        }
+        
+        #timer {
+            font-weight: bold;
+            font-size: 18px;
+            color: #4a90e2;
+        }
+        
+        .question-progress {
+            font-size: 14px;
+            color: #777;
+            margin-top: 15px;
+            text-align: right;
+            font-style: italic;
+        }
+        
+        #exam-complete {
+            text-align: center;
+            padding: 30px;
+            background-color: #f0f7ff;
+            border-radius: 10px;
+        }
+        
+        #exam-complete h3 {
+            color: #4a90e2;
+            margin-bottom: 20px;
+        }
+    </style>
+    
+    <script>
+        // Variables pour gérer l'état des questions et le timer
+        let currentQuestionIndex = 0;
+        let totalQuestions = 0; // Sera défini via une variable injectée
+        let questionTimers = {};
+        let defaultTimePerQuestion = 120; // 2 minutes par défaut par question (en secondes)
+        
+        // Ces variables seront injectées côté serveur avec les données correctes
+        document.addEventListener('DOMContentLoaded', function() {
+            // Récupérer le nombre total de questions depuis un élément caché
+            totalQuestions = parseInt(document.getElementById('total-questions').value) || 0;
+            
+            // Initialiser les timers par défaut pour toutes les questions
+            for (let i = 0; i < totalQuestions; i++) {
+                const timerEl = document.getElementById(`question-${i}-timer`);
+                if (timerEl) {
+                    questionTimers[i] = parseInt(timerEl.value) || defaultTimePerQuestion;
+                } else {
+                    questionTimers[i] = defaultTimePerQuestion;
+                }
+            }
+        });
+        
+        let timerInterval;
+        let formSubmitted = false;
+        
+        // Fonction pour formater le temps (secondes -> MM:SS)
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Démarrer le timer pour une question
+        function startQuestionTimer(questionIndex) {
+            // Arrêter le timer précédent s'il existe
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            // Réinitialiser l'affichage du timer
+            document.getElementById('timer').textContent = formatTime(questionTimers[questionIndex]);
+            
+            // Configurer et démarrer le nouveau timer
+            let timeRemaining = questionTimers[questionIndex];
+            
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                
+                // Mettre à jour l'affichage
+                document.getElementById('timer').textContent = formatTime(timeRemaining);
+                
+                // Changer la couleur quand il reste peu de temps
+                if (timeRemaining <= 30) {
+                    document.getElementById('timer').style.color = '#e74c3c';
+                }
+                
+                // Temps écoulé pour cette question
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    moveToNextQuestion(questionIndex);
+                }
+            }, 1000);
+        }
+    
+        
+        // Fonction pour passer à la question suivante
+        function moveToNextQuestion(currentIndex) {
+            // Cacher la question actuelle
+            document.getElementById(`question-${currentIndex}`).style.display = 'none';
+            
+            // Si c'était la dernière question, afficher l'écran final
+            if (currentIndex >= totalQuestions - 1) {
+                document.getElementById('exam-complete').style.display = 'block';
+                document.getElementById('timer-container').style.display = 'none';
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+                return;
+            }
+            
+            // Passer à la question suivante
+            currentQuestionIndex = currentIndex + 1;
+            document.getElementById(`question-${currentQuestionIndex}`).style.display = 'block';
+            
+            // Démarrer le timer pour la nouvelle question
+            startQuestionTimer(currentQuestionIndex);
+        }
+
+        // Gérer les événements de clic sur les boutons "Question suivante"
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialiser la première question et son timer
+            if (totalQuestions > 0) {
+                startQuestionTimer(0);
+            }
+            
+            // Ajouter des écouteurs d'événements pour tous les boutons "Question suivante"
+            const nextButtons = document.querySelectorAll('.btn-next');
+            nextButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const questionIndex = parseInt(this.getAttribute('data-question-index'));
+                    
+                    // Valider si la question a été répondue
+                    const questionElement = document.getElementById(`question-${questionIndex}`);
+                    let answered = false;
+                    
+                    // Vérifier les réponses QCM
+                    const radioInputs = questionElement.querySelectorAll('input[type="radio"]');
+                    radioInputs.forEach(input => {
+                        if (input.checked) {
+                            answered = true;
+                        }
+                    });
+                    
+                    // Vérifier les réponses texte
+                    const textInputs = questionElement.querySelectorAll('input[type="text"]');
+                    textInputs.forEach(input => {
+                        if (input.value.trim() !== '') {
+                            answered = true;
+                        }
+                    });
+                    
+                    // Si la question est répondue, ou si on force le passage
+                    if (answered || confirm('Vous n\'avez pas répondu à cette question. Voulez-vous vraiment passer à la suivante?')) {
+                        moveToNextQuestion(questionIndex);
+                    }
+                });
+            });
+            
+            // Auto-progression pour les questions QCM 
+            const radioInputs = document.querySelectorAll('input[type="radio"]');
+            radioInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                   
+                    // const questionIndex = parseInt(this.getAttribute('data-question-index'));
+                    // setTimeout(() => {
+                    //     moveToNextQuestion(questionIndex);
+                    // }, 1500);
+                });
+            });
+            
+            // Empêcher la double soumission du formulaire
+            document.getElementById('exam-form').addEventListener('submit', function(e) {
+                if (formSubmitted) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                formSubmitted = true;
+                return true;
+            });
+        });
+        
+        function exitPage() {
+            if (confirm('Êtes-vous sûr de vouloir quitter l\'examen? Toutes vos réponses seront perdues.')) {
+                window.location.href = "/etudiant";
+            }
+        }
+    </script>
+</body>
+</html>

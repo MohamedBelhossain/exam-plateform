@@ -4,6 +4,7 @@ const app = express();
 const expressLayouts = require("express-ejs-layouts");
 const methodOverride = require('method-override');
 
+
 const cors= require('cors');
 app.use(cors());
 app.use(express.json());
@@ -33,20 +34,22 @@ app.use((req, res, next) => {
 });
 
 
-
 const enseignantRouter = require("./routes/enseignant"); 
 const etudiantRouter = require("./routes/etudiant"); 
-const authRouter= require("./routes/auth");
+const authRoutes= require("./routes/auth");
 
 app.use("/enseignant", enseignantRouter);  
 app.use("/etudiant", etudiantRouter);  
-app.use("/auth",authRouter);
 
 // Importation du contrôleur d'examen pour la route publique
 const examController = require('./controllers/enseignant');
 
 // Route publique pour accéder aux examens par UUID
 app.get("/examen/:uuid", examController.getExamByUUID);
+require('./config/passport'); // Assurez-vous que le fichier de configuration de Passport est chargé
+
+// Utiliser les routes d'authentification
+app.use('/auth', authRoutes);
 
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
