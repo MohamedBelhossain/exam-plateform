@@ -19,7 +19,6 @@ document.querySelector('form').addEventListener('submit', function(e) {
     loginSuccessful();
 });
 
-// 5- وظيفة عرض الأخطاء
 function showError(message, fieldId) {
     const field = document.getElementById(fieldId);
     const errorElement = document.createElement('div');

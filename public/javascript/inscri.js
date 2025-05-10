@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
     const inputs = form.querySelectorAll('input, select');
     
-    // التحقق في الوقت الحقيقي
     inputs.forEach(input => {
         input.addEventListener('input', () => validateField(input));
         input.addEventListener('blur', () => validateField(input));
@@ -44,7 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // باقي الدوال بدون تغيير...
 });
 
     function validateField(field) {
