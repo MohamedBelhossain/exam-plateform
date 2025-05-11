@@ -79,9 +79,10 @@
                     <% }); %>
                     
                     <div id="exam-complete" style="display:none;">
-                        <h3>Vous avez terminé toutes les questions!</h3>
-                        <button type="submit" class="btn-submit">Soumettre l'examen</button>
-                    </div>
+    <h3>Vous avez terminé toutes les questions!</h3>
+    <p id="final-score" style="font-size: 20px; color: #4a90e2;"></p>
+    <button type="submit" class="btn-submit">Soumettre l'examen</button>
+</div>
                 <% } else { %>
                     <p class="no-questions">Aucune question disponible pour cet examen.</p>
                 <% } %>
@@ -368,12 +369,87 @@
     </style>
     
     <script>
+    const exam = <%- JSON.stringify(exam) %>;
+
+function calculateFinalScore() {
+    let totalPoints = 0;
+    let earnedPoints = 0;
+
+    if (!exam || !exam.questions || exam.questions.length === 0) {
+        return 0;
+    }
+
+    exam.questions.forEach(function(question) {
+        const questionId = question._id;
+        const inputs = document.querySelectorAll(`input[name="answers[${questionId}]"]`);
+        let userAnswer = null;
+
+        if (question.type === 'qcm') {
+            inputs.forEach(input => {
+                if (input.checked) {
+                    userAnswer = input.value.trim();
+                }
+            });
+        } else {
+            if (inputs[0]) {
+                userAnswer = inputs[0].value.trim();
+            }
+        }
+
+        if (userAnswer !== null && userAnswer !== '') {
+            if (question.type === 'qcm') {
+                // Handle both formats: direct string or array of responses
+                const correctAnswer = question.bonneReponse || question.reponse;
+                
+                // Check if correctAnswer is an array or string
+                if (Array.isArray(correctAnswer)) {
+                    // If it's an array, check if the user's answer is in the array
+                    if (correctAnswer.includes(userAnswer)) {
+                        earnedPoints += question.points;
+                    }
+                } else {
+                    // If it's a string (older format), do direct comparison
+                    if (userAnswer === correctAnswer) {
+                        earnedPoints += question.points;
+                    }
+                }
+            } else {
+                // Réponse directe avec tolérance (si définie)
+                const bonneReponse = (question.reponse || "").trim().toLowerCase();
+                const reponseEtudiant = userAnswer.toLowerCase();
+
+                if (question.tolerance && !isNaN(parseFloat(question.tolerance))) {
+                    const tolerance = parseFloat(question.tolerance);
+                    const reponseNum = parseFloat(reponseEtudiant);
+                    const bonneReponseNum = parseFloat(bonneReponse);
+
+                    if (!isNaN(reponseNum) && Math.abs(reponseNum - bonneReponseNum) <= tolerance) {
+                        earnedPoints += question.points;
+                    }
+                } else if (reponseEtudiant === bonneReponse) {
+                    earnedPoints += question.points;
+                }
+            }
+        }
+
+        totalPoints += question.points;
+    });
+
+    if (totalPoints === 0) return 0;
+
+    const finalScore = Math.round((earnedPoints / totalPoints) * 100);
+    document.getElementById("final-score").textContent = `Score final: ${finalScore} / 100`;
+    console.log("Score calculation: " + earnedPoints + " / " + totalPoints + " = " + finalScore);
+    return finalScore;
+}
 // Variables pour gérer l'état des questions et le timer
 let currentQuestionIndex = 0;
 let totalQuestions = 0; // Sera défini via une variable injectée
 let questionTimers = {};
 let defaultTimePerQuestion = 120; // 2 minutes par défaut par question (en secondes)
 let userCoordinates = null; // Variable pour stocker les coordonnées de géolocalisation
+let timerInterval;
+let formSubmitted = false;
 
 // Débogage: Afficher les valeurs des timers au démarrage
 function logTimerValues() {
@@ -458,9 +534,6 @@ function formatTime(seconds) {
     return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
-let timerInterval;
-let formSubmitted = false;
-
 // Démarrer le timer pour une question
 function startQuestionTimer(questionIndex) {
     // Arrêter le timer précédent s'il existe
@@ -539,6 +612,10 @@ function moveToNextQuestion(currentIndex) {
         if (examComplete) {
             examComplete.style.display = 'block';
         }
+        
+        // Calculer et afficher le score final
+        const score = calculateFinalScore();
+        console.log("Score final:", score);
         
         const timerContainer = document.getElementById('timer-container');
         if (timerContainer) {
@@ -687,6 +764,15 @@ document.addEventListener('DOMContentLoaded', function() {
         formSubmitted = true;
         return true;
     });
+    
+    // Ajouter un gestionnaire d'événement pour le bouton de soumission
+    const submitButton = document.querySelector('.btn-submit');
+    if (submitButton) {
+        submitButton.addEventListener('click', function(e) {
+            // Calculer et afficher le score final avant de soumettre
+            calculateFinalScore();
+        });
+    }
     
     // Créer la fenêtre modale pour demander la géolocalisation
     createGeolocationModal();

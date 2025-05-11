@@ -6,6 +6,101 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
+    // Add active class to labels with prefilled inputs
+    const initFormFields = () => {
+        const inputs = document.querySelectorAll('input, select');
+        
+        inputs.forEach(input => {
+            // Check if the input has a value
+            if (input.value.trim() !== '') {
+                input.parentElement.classList.add('active');
+            } else {
+                input.parentElement.classList.remove('active');
+            }
+        });
+    };
+
+    // Run this first to handle any preloaded values
+    initFormFields();
+
+    // Setup event listeners for inputs to handle focus/blur
+    const inputs = document.querySelectorAll('input, select');
+    
+    inputs.forEach(input => {
+        // Focus event - always add active class
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('active');
+        });
+        
+        // Blur event - only remove active class if empty
+        input.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.parentElement.classList.remove('active');
+            }
+            
+            // Additional validation for email when blurring the email field
+            if (this.id === 'email') {
+                validateUAEEmail(this.value);
+            }
+        });
+        
+        // Input event - add active class when typing, remove if cleared
+        input.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                this.parentElement.classList.add('active');
+            } else {
+                this.parentElement.classList.remove('active');
+            }
+            
+            // Live validation for email as user types
+            if (this.id === 'email') {
+                const emailInput = document.getElementById('email');
+                const emailError = document.getElementById('email-error');
+                
+                // Remove any error styles if the field is empty
+                if (this.value.trim() === '') {
+                    emailInput.classList.remove('error-input');
+                    if (emailError) emailError.style.display = 'none';
+                }
+            }
+        });
+    });
+    
+    // Function to validate UAE student email
+    function validateUAEEmail(email) {
+        const emailInput = document.getElementById('email');
+        let emailError = document.getElementById('email-error');
+        
+        // Create error message element if it doesn't exist
+        if (!emailError) {
+            emailError = document.createElement('div');
+            emailError.id = 'email-error';
+            emailError.className = 'error-message';
+            emailInput.parentElement.appendChild(emailError);
+        }
+        
+        // Only validate if there's actually content
+        if (email.trim() === '') {
+            emailInput.classList.remove('error-input');
+            emailError.style.display = 'none';
+            return true;
+        }
+        
+        // Check if the email ends with @etu.uae.ac.ma
+        const uaeEmailRegex = /^[a-z0-9._%+-]+@etu\.uae\.ac\.ma$/i;
+        
+        if (!uaeEmailRegex.test(email)) {
+            emailInput.classList.add('error-input');
+            emailError.textContent = 'L\'email doit se terminer par @etu.uae.ac.ma';
+            emailError.style.display = 'block';
+            return false;
+        } else {
+            emailInput.classList.remove('error-input');
+            emailError.style.display = 'none';
+            return true;
+        }
+    }
+
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
         console.log("Formulaire soumis");
@@ -21,10 +116,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         console.log("Données saisies:", email, nom, prenom, dateNaissance, sexe, etablissement);
 
-        const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
-        if (!emailRegex.test(email)) {
-            alert('Veuillez entrer une adresse email valide');
-            return;
+        // Validate UAE student email
+        if (!validateUAEEmail(email)) {
+            return; // Stop form submission if email is invalid
         }
 
         if (!nom || !prenom || !dateNaissance || !sexe || !etablissement || !password || !confirmPassword) {
@@ -78,22 +172,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(userData)
             });
 
-           if (response.ok) {
-    const data = await response.json();
-    console.log("Réponse:", data);
-    
-    // ✅ Stocker le token dans localStorage
-    if (data.authToken) {
-        localStorage.setItem('token', data.authToken);
-    }
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Réponse:", data);
+                
+                // ✅ Stocker le token dans localStorage
+                if (data.authToken) {
+                    localStorage.setItem('token', data.authToken);
+                }
 
-    // Enregistrer l'email pour vérification
-    sessionStorage.setItem('pendingEmail', email);
-    
-    alert('Inscription réussie! Vous allez recevoir un email de vérification.');
-    window.location.href = '/verification_email';
-}
- else {
+                // Enregistrer l'email pour vérification
+                sessionStorage.setItem('pendingEmail', email);
+                
+                alert('Inscription réussie! Vous allez recevoir un email de vérification.');
+                window.location.href = '/verification_email';
+            } else {
                 const errorData = await response.json();
                 alert(errorData.message || 'Une erreur est survenue lors de l\'inscription');
             }
@@ -102,23 +195,5 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Erreur:', error);
             alert('Une erreur est survenue lors de la connexion au serveur');
         }
-    });
-
-    const inputs = document.querySelectorAll('input, select');
-    
-    inputs.forEach(input => {
-        if (input.value) {
-            input.parentElement.classList.add('active');
-        }
-        
-        input.addEventListener('focus', function() {
-            this.parentElement.classList.add('active');
-        });
-        
-        input.addEventListener('blur', function() {
-            if (!this.value) {
-                this.parentElement.classList.remove('active');
-            }
-        });
     });
 });

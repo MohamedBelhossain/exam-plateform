@@ -31,14 +31,11 @@ body {
     padding: 50px;
     cursor: pointer;
   
-  
     border: 1px solid var(--light);
     box-shadow: 
         0 15px 35px rgba(255, 255, 255, 0.1),
         inset 0 0 10px rgba(255, 255, 255, 0.3);
-
 }
-
 
 /* .base:hover {
     transform: translateY(-10px);
@@ -116,7 +113,7 @@ select:valid ~ label {
     top: -10px;
     left: 5px;
     font-size: 12px;
-    color: var(--secondary-color); /* Corrigé de --secondary à --secondary-color */
+    /* color: var(--secondary-color); Corrigé de --secondary à --secondary-color */
 }
 
 .login-btn {
@@ -158,45 +155,50 @@ select:valid ~ label {
     100% { transform: rotate(360deg); }
 }
 
-/* Style général pour tous les placeholders */
+/* === Style général pour tous les placeholders === */
 ::placeholder {
     color: transparent;
+    transition: opacity 0.3s ease;
 }
 
-/* === Style spécifique pour l'email === */
-input[type="email"] {
-    padding-right: 2.5rem;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='rgba(255,255,255,0.6)'%3E%3Cpath d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 20px;
+/* === Disparition du placeholder quand il y a du texte === */
+input:focus::placeholder,
+input:not(:placeholder-shown)::placeholder {
+    opacity: 0;
 }
 
-/* Disparition du placeholder au focus/remplissage */
+/* === Apparition du label en haut du champ quand texte saisi === */
+input:not(:placeholder-shown) ~ label {
+    top: -10px;
+    left: 5px;
+    font-size: 12px;
+}
+
+/* === Le style pour les inputs de type "email" === */
 input[type="email"]:focus::placeholder,
 input[type="email"]:not(:placeholder-shown)::placeholder {
     opacity: 0;
     transition: var(--transition);
 }
 
-/* Style du label */
-input[type="email"]:not(:placeholder-shown) ~ label {
+/* === Apparition du label lorsqu'il y a du texte ou focus === */
+input[type="email"]:not(:placeholder-shown) ~ label,
+input[type="email"]:focus ~ label {
     top: -10px;
     left: 5px;
-    font-size: 0.8rem;
-    color: var(--secondary-color); /* Corrigé de --secondary à --secondary-color */
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--secondary-color);
 }
 
-/* Validation visuelle */
-input[type="email"]:valid {
-    border-color: var(--secondary-color); /* Corrigé de --secondary à --secondary-color */
+/* === Pour s'assurer que le placeholder est bien caché après la saisie dans les autres champs === */
+input[type="text"]:not(:placeholder-shown)::placeholder,
+input[type="date"]:not(:placeholder-shown)::placeholder,
+select:valid::placeholder {
+    opacity: 0;
 }
 
-input[type="email"]:invalid:not(:focus) {
-    border-color: rgb(255, 255, 255);
-}
-
-/* Style spécifique pour le champ date */
+/* === Style spécifique pour le champ date === */
 input[type="date"] {
     position: relative;
 }
@@ -254,7 +256,7 @@ input[type="date"]:focus {
     top: -11px;
     left: 5px;
     font-size: 0.8rem;
-    color: var(--secondary-color); /* Corrigé de --secondary à --secondary-color */
+    /* color: var(--secondary-color); Corrigé de --secondary à --secondary-color */
 }
 
 
