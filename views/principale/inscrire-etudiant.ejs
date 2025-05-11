@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulaire d'Inscription</title>
-    <link rel="stylesheet" href="css/inscr.css">
+    <link rel="stylesheet" href="/css/inscri.css">
 </head>
 <body>
-    
-        <!-- ... vos champs de formulaire ... -->
     
     <div class="base">
         <div class="login-container">
             <h2>Inscription</h2>
-
+            
+            <!-- Formulaire corrigé avec les IDs correspondants au JavaScript -->
+            <form id="inscriptionForm">
                 <div class="form-group">
                     <input 
                         type="email" 
@@ -26,34 +26,30 @@
                     <label for="email">Email</label>
                 </div>
 
-
-
-
-
                 <div class="form-group">
                     <input type="text" 
                     id="nom" 
                     name="nom" 
                     required>
-                    <label>Nom</label>
+                    <label for="nom">Nom</label>
                 </div>
 
                 <div class="form-group">
                     <input type="text"
+                     id="prenom"
                      required
-                      name="prenom">
-                    <label >Prénom</label>
+                     name="prenom">
+                    <label for="prenom">Prénom</label>
                 </div>
 
                 <div class="form-group">
                     <input 
                         type="date" 
-                        id="naissance" 
-                        name="naissance" 
+                        id="dateNaissance" 
+                        name="dateNaissance" 
                         required
-                        placeholder="Date de naissance"
                     >
-                    <label for="naissance">Date de naissance</label>
+                    <label for="dateNaissance">Date de naissance</label>
                 </div>
 
                 <div class="form-group">
@@ -62,37 +58,40 @@
                         <option value="homme">Homme</option>
                         <option value="femme">Femme</option>
                     </select>
-                    <label for ="sexe">Sexe</label>
-                </div>
-
-
-                <div class="form-group">
-                    <input type="text"  name="filiere"  required>
-                    <label>Filiere</label>
+                    <label for="sexe">Sexe</label>
                 </div>
 
                 <div class="form-group">
-                    <input type="text" name="etablissement" required>
-                    <label >Etablissement</label>
+                    <input type="text" id="filiere" name="filiere" required>
+                    <label for="filiere">Filière</label>
                 </div>
 
-            
-                <button 
-                 type="submit"
-                 class="login-btn"
-                 >continue
-                </button>
+                <div class="form-group">
+                    <input type="text" id="etablissement" name="etablissement" required>
+                    <label for="etablissement">Établissement</label>
+                </div>
+
+                <!-- Ajout des champs de mot de passe qui manquaient -->
+                <div class="form-group">
+                    <input type="password" id="password" name="password" required>
+                    <label for="password">Mot de passe</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    <label for="confirmPassword">Confirmer le mot de passe</label>
+                </div>
+
+                <button type="submit" class="login-btn">INSCRIRE</button>
                 
                 <div class="extra-links">
                     <a href="connexion">Déjà un compte ? Connectez-vous</a>
                 </div>
-            
+            </form>
         </div>
     </div>
     
-</form>
-<script src="/javascript/inscri.js"></script>
-
-
+    <!-- Placez votre script JavaScript dans un fichier externe -->
+    <script src="/javascript/inscri.js"></script>
 </body>
 </html>

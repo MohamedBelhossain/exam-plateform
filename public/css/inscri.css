@@ -14,6 +14,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: "Poppins", sans-serif;
+    /* height:100vh; */
 }
 
 body {
@@ -28,50 +29,26 @@ body {
     position: relative;
     border-radius: 20px;
     padding: 50px;
-    transition: var(--transition);
     cursor: pointer;
-    overflow: hidden;
+  
+  
     border: 1px solid var(--light);
     box-shadow: 
         0 15px 35px rgba(255, 255, 255, 0.1),
         inset 0 0 10px rgba(255, 255, 255, 0.3);
-    animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards,
-               float 3s ease-in-out infinite;
+
 }
 
-@keyframes slideUp {
-    to { transform: translateY(0); opacity: 1; }
-}
 
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
-}
-
-.base::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: conic-gradient(
-        transparent 20%,
-        var(--secondary-color) 50%, /* Corrigé de --secondary à --secondary-color */
-        transparent 80%
-    );
-    animation: rotate 4s linear infinite;
-}
-
-.base:hover {
+/* .base:hover {
     transform: translateY(-10px);
-}
+} */
 
 .login-container {
     position: relative;
     z-index: 1;
     background: rgba(0, 0, 0, 0.9);
-    padding: 50px;
+    /* padding: 50px; */
     border-radius: 15px;
     width: 100%;
     max-width: 600px;
@@ -245,7 +222,7 @@ input[type="date"]:focus {
 
 /* sexe */
 .form-group select {
-    padding: -100px;
+    padding: 10px;
     padding-right: 2.5rem;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
