@@ -1,25 +1,37 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduConnect Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/2.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>exam plateforme</title>
+    <link rel="stylesheet" href="/css/acceuille.css" />
 </head>
 <body>
-    <div class="navbar">
-        <img class= logo src="Study Room white.svg" alt="alternative-text">
-                        <ul>
-                            <li><a href="contact">Contacte</a></li>
-                        </ul>
-        
+   <nav class="navbar">
+  <div class="logo">Espace d'Étude</div>
+
+  <div class="nav-right">
+    <ul>
+      <li><a href="accueil">Accueil</a></li>
+      <li><a href="connexion">Connexion</a></li>
+      <li><a href="contact">Contact</a></li>
+      <li><a href="about">À propos</a></li>
+    </ul>
+
+    <div class="burger">
+      <div></div>
+      <div></div>
+      <div></div>
     </div>
+  </div>
+</nav>
+
 
     <main class="container">
         <div class="acceuille">
-            <h1>Study room</h1>
-            <p>Plateforme collaborative pour enseignants et étudiants</p>
+           <h1>Espace d'Étude Collaboratif</h1>
+<p>Plateforme interactive facilitant l’échange et la collaboration entre enseignants et étudiants</p>
+
         </div>
 
         <div class="role-grid">
@@ -31,7 +43,7 @@
                     <p class="card-description">
                         Outils avancés de gestion de cours, suivi des étudiants et analytics détaillés.
                     </p>
-                    <a href="inscrire-enseignant" class="card-button teacher-button">Accéder</a>
+                    <a href="connexion" class="card-button teacher-button">Accéder</a>
                 </div>
             </div>
 
@@ -43,11 +55,20 @@
                     <p class="card-description">
                         Accès aux ressources, suivi de progression et outils de collaboration.
                     </p>
-                    <a href="inscrire-etudiant" class="card-button student-button">Accéder</a>
+                    <a href="connexion" class="card-button student-button">Accéder</a>
                 </div>
             </div>
         </div>
     </main>
+    <script>
+        const burger = document.querySelector('.burger');
+const navLinks = document.querySelector('.navbar ul');
+
+burger.addEventListener('click', () => {
+  navLinks.classList.toggle('active');
+});
+
+    </script>
     <script src="/javascript/2.js" defer></script>
 </body>
 </html>

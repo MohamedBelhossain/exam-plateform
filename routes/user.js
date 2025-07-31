@@ -33,102 +33,59 @@ router.post('/forgot-password', userController.forgotPassword);
 router.post('/reset-password', userController.resetPassword);
 
 //
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  console.log('Email reçu pour reset:', email);
 
+  // Si l'email est vide
+  if (!email) return res.status(400).json({ message: 'Email manquant.' });
 
-// Example of another protected route
-router.put('/update-profile', auth, async (req, res) => {
-  try {
-    // Example functionality - update user profile
-    // Implementation would go here
-    res.status(200).json({ message: 'Profil mis à jour avec succès' });
-  } catch (error) {
-    res.status(500).json({ message: 'Erreur lors de la mise à jour du profil' });
-  }
+  // Vérifie que l'utilisateur existe
+  const user = await User.findOne({ email });
+  if (!user) return res.status(404).json({ message: 'Utilisateur introuvable.' });
+
+  // Génère un token, envoie l’email (tu peux logguer à la place d’envoyer)
+  const token = crypto.randomBytes(20).toString('hex');
+  user.resetToken = token;
+  user.resetTokenExpire = Date.now() + 3600000; // 1h
+  await user.save();
+
+  console.log(`Lien à envoyer : http://localhost:3000/reset-password/${token}`);
+
+  res.json({ message: 'Email envoyé (simulé)' });
 });
 
+router.get('/reset-password/:token', async (req, res) => {
+  const token = req.params.token;
 
+  // Tu peux ici vérifier le token dans la base de données si tu veux
 
+  res.render('principale/reset-password', { token });
+});
+router.post('/reset-password/:token', async (req, res) => {
+  const { password, confirmPassword } = req.body;
+  const token = req.params.token;
 
-/**
- * Route for getting the current user profile (GET /api/users/me)
- * Protected with authentication middleware
- */
-
-router.get('/me', auth, async (req, res) => {
-  try {
-    // User info is already available in req.user from the auth middleware
-    const userWithoutPassword = req.user.toObject();
-    delete userWithoutPassword.password;
-    
-    res.status(200).json(userWithoutPassword);
-  } catch (e) {
-    console.error('Error fetching user profile:', e);
-    res.status(500).json({ message: 'Erreur lors de la récupération du profil' });
+  if (password !== confirmPassword) {
+    return res.send('Les mots de passe ne correspondent pas.');
   }
+
+  const user = await User.findOne({
+    resetToken: token,
+    resetTokenExpiration: { $gt: Date.now() }
+  });
+
+  if (!user) {
+    return res.send('Lien invalide ou expiré.');
+  }
+
+  user.password = password; // Pense à hasher si tu utilises bcrypt
+  user.resetToken = undefined;
+  user.resetTokenExpiration = undefined;
+  await user.save();
+
+  res.send('Mot de passe modifié avec succès.');
 });
 
-router.patch('/me', auth, async (req, res) => {
-  const updates = Object.keys(req.body);
-  const allowedUpdates = ['nom', 'prenom', 'etablissement', 'filiere']; // Limit what can be updated
-  const isValidOperation = updates.every(update => allowedUpdates.includes(update));
-  
-  if (!isValidOperation) {
-    return res.status(400).json({ message: 'Mises à jour non valides' });
-  }
-  
-  try {
-    // Update user fields
-    updates.forEach(update => req.user[update] = req.body[update]);
-    await req.user.save();
-    
-    // Return updated user without password
-    const userWithoutPassword = req.user.toObject();
-    delete userWithoutPassword.password;
-    
-    res.status(200).json({ 
-      message: 'Profil mis à jour avec succès',
-      user: userWithoutPassword
-    });
-  } catch (e) {
-    console.error('Error updating user profile:', e);
-    res.status(400).json({ message: 'Erreur lors de la mise à jour du profil' });
-  }
-});
-
-router.patch('/password', auth, async (req, res) => {
-  try {
-    const { currentPassword, newPassword, confirmPassword } = req.body;
-    
-    // Check if new passwords match
-    if (newPassword !== confirmPassword) {
-      return res.status(400).json({ message: 'Les nouveaux mots de passe ne correspondent pas' });
-    }
-    
-    // Validate password complexity
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(newPassword)) {
-      return res.status(400).json({
-        message: 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial'
-      });
-    }
-    
-    // Verify current password
-    const bcrypt = require('bcryptjs');
-    const isMatch = await bcrypt.compare(currentPassword, req.user.password);
-    
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Mot de passe actuel incorrect' });
-    }
-    
-    // Update password
-    req.user.password = newPassword; // The pre-save hook will hash it
-    await req.user.save();
-    
-    res.status(200).json({ message: 'Mot de passe modifié avec succès' });
-  } catch (e) {
-    console.error('Error changing password:', e);
-    res.status(500).json({ message: 'Erreur lors du changement de mot de passe' });
-  }
-});
 
 module.exports = router;

@@ -1,42 +1,84 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Connexion</title>
-    <link rel="stylesheet" href="/css/connexion.css">
+    <link rel="stylesheet" href="/css/connexion.css" />
 </head>
 <body>
-    <div class="base">
-        <div class="connexion">
-            <h2>Connexion</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <input 
-                        type="email"  
-                        id="email" 
-                        name="email" 
-                        required
-                        placeholder="exemple@domaine.com"
-                        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
-                    >
-                    <label for="email">Email</label>
-                </div>
+     <nav class="navbar">
+  <div class="logo">Espace d'Étude</div>
 
-                <div class="form-group">
-                    <input type="password" id="password" name="password" required>
-                    <label for="password">Mot de passe</label>
-                </div>
+  <div class="nav-right">
+    <ul>
+      <li><a href="accueil">Accueil</a></li>
+      <li><a href="connexion">Connexion</a></li>
+      <li><a href="contact">Contact</a></li>
+      <li><a href="about">À propos</a></li>
+    </ul>
 
-                <button  type="submit" class="login-btn">Login<button>
-                
-                <div class="extra-links">
-                    <a href="/principale/forgot">Mot de passe oublié ?</a>
-                    <a href="/principale/accueil">Créer un compte</a>
-                </div>
-            </form>
-        </div>
+    <div class="burger">
+      <div></div>
+      <div></div>
+      <div></div>
     </div>
-    <script src="/javascript/connexion.js"></script>
+  </div>
+</nav>
+
+    <div class="connexion-container">
+    <h2>Se connecter</h2>
+    <form class="connexion-form" id="loginForm">
+        <input type="email" id="email" placeholder="Adresse e-mail" required />
+        <input type="password" id="password" placeholder="Mot de passe" required />
+        <button type="submit">Connexion</button>
+    </form>
+    <div class="connexion-links">
+        <p><a href="forgot">Mot de passe oublié ?</a></p>
+        <p>Pas encore de compte ? <a href="#" id="signupLink">S'inscrire</a></p>
+    </div>
+</div>
+
+
+     <div id="signupModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <h3>Créer un compte en tant que :</h3>
+            <div class="signup-options">
+                <a href="inscrire-etudiant" class="option-btn">Étudiant</a>
+                <a href="inscrire-enseignant" class="option-btn">Enseignant</a>
+            </div>
+        </div>
+    </div> 
+
+    <script>
+        const modal = document.getElementById("signupModal");
+        const openBtn = document.getElementById("signupLink");
+        const closeBtn = document.getElementById("closeModal");
+
+        openBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            modal.classList.remove("hidden");
+        });
+
+        closeBtn.addEventListener("click", () => {
+            modal.classList.add("hidden");
+        });
+
+        window.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                modal.classList.add("hidden");
+            }
+        });
+
+        const burger = document.querySelector('.burger');
+const navLinks = document.querySelector('.navbar ul');
+
+burger.addEventListener('click', () => {
+  navLinks.classList.toggle('active');
+});
+
+    </script>
+   <script src="/javascript/connexion.js"></script>
 </body>
 </html>

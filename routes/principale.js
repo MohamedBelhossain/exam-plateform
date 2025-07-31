@@ -12,6 +12,12 @@ router.get('/', (req, res) => {
 router.get('/accueil', (req, res) => {
   res.render('principale/accueil');
 });
+router.get('/about', (req, res) => {
+  res.render('principale/about');
+});
+router.get('/contact',(req,res)=>{
+  res.render('principale/contact');
+});
 // Étudiant
 router.get('/inscrire-etudiant', redirectIfAuthenticated, (req, res) => {
   res.render('principale/inscrire-etudiant', { error: null });
@@ -26,6 +32,7 @@ router.get('/inscrire-enseignant', redirectIfAuthenticated, (req, res) => {
 router.get('/connexion', redirectIfAuthenticated, (req, res) => {
   res.render('principale/connexion', { error: null, success: null });
 });
+
 
 // Route pour la page d'inscription
 router.get('/inscrire', redirectIfAuthenticated, (req, res) => {

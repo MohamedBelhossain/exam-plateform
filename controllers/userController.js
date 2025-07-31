@@ -1,9 +1,9 @@
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const nodemailer = require('nodemailer');
 
-// Helper function for sending verification email
 const sendVerificationEmail = async (email, token) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -17,7 +17,13 @@ const sendVerificationEmail = async (email, token) => {
     from: `"Votre Site" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Vérifiez votre adresse e-mail",
-    html: `<p>Voici votre code de vérification : <strong>${token}</strong></p>`
+    html: `
+      <p>Bonjour,</p>
+      <p>Voici votre code de vérification :</p>
+      <h2>${token}</h2>
+      <p>Merci de ne pas partager ce code avec qui que ce soit.</p>
+      <p>Si vous n'avez pas demandé cette vérification, ignorez cet email.</p>
+    `
   };
 
   try {
@@ -30,7 +36,7 @@ const sendVerificationEmail = async (email, token) => {
 };
 
 // Controller for registration
-exports.register = async (req, res) => {
+const register = async (req, res) => {
   try {
     const { email, password, nom, prenom, dateNaissance, sexe, etablissement, filiere, role } = req.body;
 
@@ -66,23 +72,19 @@ exports.register = async (req, res) => {
     try {
       await sendVerificationEmail(email, token);
       console.log("📧 Email de vérification envoyé");
-    } catch (emailError) {
-      console.error("❌ Erreur lors de l'envoi de l'email:", emailError.message);
+    } catch (err) {
+      return res.status(500).json({ message: "Échec de l'envoi du mail de vérification" });
     }
 
-    return res.status(201).json({
-      message: "Inscription réussie",
-      user: userWithoutPassword,
-      authToken,
-    });
+    res.status(201).json({ message: "Inscription réussie", token: authToken, user: userWithoutPassword });
+
   } catch (error) {
-    console.error("❌ Erreur globale lors de l'inscription:", error);
-    return res.status(500).json({ message: "Erreur lors de l'inscription: " + error.message });
+    console.error("❌ Erreur dans register:", error);
+    res.status(500).json({ message: "Erreur lors de l'inscription" });
   }
 };
-
 // Controller for login
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -107,30 +109,51 @@ exports.login = async (req, res) => {
   }
 };
 
-// Controller for password reset (forgot password)
-exports.forgotPassword = async (req, res) => {
+const crypto = require('crypto');
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
   try {
-    const { email } = req.body;
     const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'Utilisateur introuvable' });
 
-    if (!user) {
-      return res.status(404).json({ message: 'Aucun compte trouvé avec cet email' });
-    }
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpires = Date.now() + 3600000; // 1h
 
-    const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_RESET_SECRET, { expiresIn: '1h' });
     user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = Date.now() + 3600000;
+    user.resetPasswordExpires = resetTokenExpires;
     await user.save();
 
-    res.status(200).json({ message: 'Un email de réinitialisation a été envoyé à votre adresse email' });
+    // Transporteur Nodemailer
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`;
+    const mailOptions = {
+      to: user.email,
+      subject: 'Réinitialisation de mot de passe',
+      html: `<p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
+             <p>Cliquez ici pour réinitialiser : <a href="${resetUrl}">${resetUrl}</a></p>`
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'Email envoyé avec le lien de réinitialisation' });
   } catch (error) {
-    console.error('Erreur lors de la demande de réinitialisation:', error);
-    res.status(500).json({ message: 'Erreur lors de la demande de réinitialisation' });
+    console.error('Erreur forgotPassword:', error);
+    res.status(500).json({ message: 'Erreur interne' });
   }
 };
 
+
 // Controller for resetting password
-exports.resetPassword = async (req, res) => {
+const resetPassword = async (req, res) => {
   try {
     const { token, password, confirmPassword } = req.body;
 
@@ -164,4 +187,11 @@ exports.resetPassword = async (req, res) => {
     console.error('Erreur lors de la réinitialisation du mot de passe:', error);
     res.status(500).json({ message: 'Erreur lors de la réinitialisation du mot de passe' });
   }
+};
+module.exports = {
+  register,
+  login,
+  forgotPassword,
+  resetPassword,
+  sendVerificationEmail
 };

@@ -1,0 +1,264 @@
+
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  background-color: #f5f7fa;
+  color: #333;
+}
+.navbar {
+  display: flex;
+  justify-content: space-between; /* garde logo à gauche, groupe nav à droite */
+  align-items: center;
+  padding: 15px 30px;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: box-shadow 0.3s ease;
+}
+
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+
+.navbar.scrolled {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+
+.navbar .logo {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #010036;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  user-select: none;
+}
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 30px;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar ul li a {
+  text-decoration: none;
+  color: #7f8c8d;
+  font-weight: 600;
+  padding: 8px 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.3s ease, border-bottom-color 0.3s ease;
+}
+
+.navbar ul li a:hover,
+.navbar ul li a:focus {
+  color: #010036;
+  border-bottom-color: #010036;
+  outline: none;
+}
+
+
+.burger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+}
+
+.burger div {
+  width: 25px;
+  height: 3px;
+  background-color: #010036;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+@media (max-width: 768px) {
+ 
+  .nav-right {
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+  }
+
+  .navbar ul {
+    position: fixed;
+    top: 60px;
+    right: 0;
+    background-color: #fff;
+    flex-direction: column;
+    width: 200px;
+    padding: 20px;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+    z-index: 999;
+  }
+
+  .navbar ul.active {
+    transform: translateX(0);
+  }
+
+  .burger {
+    display: flex;
+  }
+}
+
+.container {
+  width: 90%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+
+.about-hero {
+  background-color: #0c1823;
+  color: white;
+  padding: 80px 0;
+  text-align: center;
+}
+
+.about-hero h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.about-hero p {
+  font-size: 1.25rem;
+  font-weight: 300;
+}
+
+
+.about-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 40px;
+  padding: 60px 0;
+}
+
+
+
+.about-content {
+  flex: 1 1 500px;
+}
+
+.about-content h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #03182d;
+}
+
+.about-content p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+
+.values-section {
+  background-color: #fff;
+  padding: 60px 0;
+}
+
+.values-grid {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.value-card {
+  background-color: #e6f0ff;
+  padding: 30px 20px;
+  border-radius: 12px;
+  width: 280px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(30,144,255,0.15);
+  transition: transform 0.3s ease;
+}
+
+.value-card:hover {
+  transform: translateY(-10px);
+}
+
+.value-card i {
+  font-size: 2.5rem;
+  color: #9db3c9;
+  margin-bottom: 15px;
+}
+
+.value-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  color: #46515c;
+}
+
+.value-card p {
+  font-size: 1rem;
+  color: #444;
+}
+
+
+.team-section {
+  padding: 60px 0;
+  background-color: #f0f4ff;
+}
+
+.team-grid {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  flex-wrap: wrap;
+}
+
+.team-member {
+  background-color: white;
+  border-radius: 15px;
+  padding: 30px 20px;
+  width: 240px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(30,144,255,0.1);
+}
+
+.team-member h3 {
+  margin-bottom: 10px;
+  color: #000000;
+  font-size: 1.25rem;
+}
+
+.team-member p {
+  font-size: 1rem;
+  color: #555;
+}
+
+
+@media (max-width: 900px) {
+  .about-section {
+    flex-direction: column;
+    padding: 40px 0;
+  }
+  
+  .about-content, .about-image {
+    flex: unset;
+    width: 100%;
+  }
+  
+  .values-grid, .team-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+}

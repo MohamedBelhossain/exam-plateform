@@ -7,8 +7,11 @@ const cors = require('cors');
 const multer = require('multer');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
-const path = require('path'); // Added path module for joining paths
+const path = require('path');
 require('dotenv').config();
+
+// Importer tout le contrôleur utilisateur sous un seul objet
+const userController = require('./controllers/userController');
 
 // Initialize app
 const app = express();
@@ -19,6 +22,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+app.use('/api/users', require('./routes/user'));
+
 
 // Method override for RESTful forms
 app.use(methodOverride('_method'));
@@ -76,29 +81,25 @@ mongoose.connect(process.env.DATABASE_URL, {
   .catch((error) => {
     console.error("❌ Error connecting to MongoDB Atlas:", error);
   });
-// Import routes and controllers with correct destructuring
+
+// Import other routers/controllers
 const enseignantRouter = require("./routes/enseignant");
 const etudiantRouter = require("./routes/etudiant");
 const principaleRouter = require('./routes/principale');
-const userController = require('./controllers/userController');
 const { auth, redirectIfAuthenticated } = require('./middlewares/authentification');
-
-// Setup authentication routes
-app.post('/api/users/register', userController.register);
+const examController = require('./controllers/enseignant');
 
 
-app.post('/api/users/login', userController.login);
-app.post('/api/users/forgot-password', userController.forgotPassword);
-app.post('/api/users/reset-password', userController.resetPassword);
+// Routes
 
-// Verification email handling
+// Email verification page
 app.get('/verification_email', (req, res) => {
   res.render('principale/verification_email', { 
     message: 'Un email de vérification a été envoyé à votre adresse email.' 
   });
 });
 
-// Verification token route (pour lien cliquable dans email)
+// Verify email by token in URL
 app.get('/verify-email/:token', async (req, res) => {
   const { token } = req.params;
   try {
@@ -126,7 +127,7 @@ app.get('/verify-email/:token', async (req, res) => {
   }
 });
 
-// API pour vérifier le code entré par l'utilisateur
+// API to verify code sent by user
 app.post('/api/verify', async (req, res) => {
   try {
     const { email, code } = req.body;
@@ -148,7 +149,7 @@ app.post('/api/verify', async (req, res) => {
   }
 });
 
-// API pour renvoyer le code de vérification
+// API to resend verification code
 app.post('/api/resend', async (req, res) => {
   try {
     const { email } = req.body;
@@ -162,7 +163,9 @@ app.post('/api/resend', async (req, res) => {
     user.generateVerificationToken();
     await user.save();
 
-    await sendVerificationEmail(email, user.verificationToken);
+    // Use userController's function if exported or define your own here:
+    await userController.sendVerificationEmail(email, user.verificationToken);
+
     console.log("📧 Email de vérification renvoyé");
     res.status(200).json({ message: 'Code renvoyé avec succès' });
   } catch (error) {
@@ -171,12 +174,19 @@ app.post('/api/resend', async (req, res) => {
   }
 });
 
-// Mount routes - removed duplicates
+// User authentication routes
+app.post('/api/users/register', userController.register);
+app.post('/api/users/login', userController.login);
+app.post('/api/users/forgot-password', userController.forgotPassword);
+app.post('/api/users/reset-password', userController.resetPassword);
+const forgotRoutes = require('./routes/user');
+app.use('/', forgotRoutes);
+
+
+// Other routers
 app.use("/enseignant", enseignantRouter);
 app.use("/etudiant", etudiantRouter);
 app.use('/principale', principaleRouter);
-
-// Fix the user routes to use the fixed user.js with auth middleware
 app.use('/api/users', require('./routes/user'));
 
 // Main route
@@ -189,35 +199,8 @@ app.get('/', (req, res) => {
   res.redirect('/principale/accueil');
 });
 
-// Import exam controller for public routes
-const examController = require('./controllers/enseignant');
+// Public exam route
 app.get("/examen/:uuid", examController.getExamByUUID);
-
-// Function to send verification email using Nodemailer
-const sendVerificationEmail = async (email, token) => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-  });
-
-  const mailOptions = {
-    from: `"Votre Site" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: "Vérifiez votre adresse e-mail",
-    html: `<p>Voici votre code de vérification : <strong>${token}</strong></p>`
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`📧 Email envoyé à ${email}`);
-  } catch (error) {
-    console.error("❌ Échec d'envoi de l'email:", error.message);
-    throw new Error("Erreur lors de l'envoi de l'email");
-  }
-};
 
 // 404 handler
 app.use((req, res, next) => {

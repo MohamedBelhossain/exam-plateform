@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 const validator = require('validator');
+const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -10,10 +10,9 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true,
     lowercase: true,
-    validate(value) {
-      if (!validator.isEmail(value)) {
-        throw new Error('Email invalid');
-      }
+    validate: {
+      validator: value => validator.isEmail(value),
+      message: 'Email invalide'
     }
   },
   password: {
@@ -32,9 +31,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  dateNaissance: {
-    type: Date
-  },
+  dateNaissance: Date,
   sexe: {
     type: String,
     enum: ['homme', 'femme', 'autre']
@@ -49,7 +46,6 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    required: true,
     enum: ['etudiant', 'enseignant', 'admin'],
     default: 'etudiant'
   },
@@ -57,65 +53,58 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  verificationToken: String,
+  verificationToken: String, // code à 6 chiffres
+  verificationTokenExpires: Date, // date d'expiration du code
   verified: {
     type: Boolean,
     default: false
   },
   resetPasswordToken: String,
   resetPasswordExpires: Date
-}, {
-  timestamps: true
-});
+}, { timestamps: true });
 
-// Méthode pour générer un token de vérification
-userSchema.methods.generateVerificationToken = function() {
-  this.verificationToken = crypto.randomBytes(32).toString('hex');
-  return this.verificationToken;
+/**
+ * Génère un code de vérification à 6 chiffres lisible
+ * et stocke sa date d’expiration (10 minutes)
+ */
+userSchema.methods.generateVerificationToken = function () {
+  const code = Math.floor(100000 + Math.random() * 900000).toString(); // ex: "345678"
+  this.verificationToken = code;
+  this.verificationTokenExpires = Date.now() + 10 * 60 * 1000; // expire dans 10 minutes
+  return code;
 };
 
-// Méthode pour générer un token JWT et sauvegarder l'utilisateur
-userSchema.methods.generateAuthTokenAndSaveUser = async function() {
-  const user = this;
-  const token = jwt.sign(
-    { userId: user._id.toString() },
+// Générer un token JWT d'authentification
+userSchema.methods.generateAuthToken = function () {
+  return jwt.sign(
+    { userId: this._id.toString() },
     process.env.JWT_SECRET,
     { expiresIn: '1d' }
   );
-  
-  await user.save();
-  return token;
 };
 
-// Méthode pour trouver un utilisateur par email et mot de passe
-userSchema.statics.findUser = async function(email, password) {
-  const user = await User.findOne({ email });
-  
-  if (!user) {
-    throw new Error('Identifiants invalides');
-  }
-  
+// Vérifie email + mot de passe
+userSchema.statics.findUser = async function (email, password) {
+  const user = await this.findOne({ email });
+  if (!user) throw new Error('Identifiants invalides');
+
   const isMatch = await bcrypt.compare(password, user.password);
-  
-  if (!isMatch) {
-    throw new Error('Identifiants invalides');
-  }
-  
+  if (!isMatch) throw new Error('Identifiants invalides');
+
   return user;
 };
 
 // Hash du mot de passe avant sauvegarde
-userSchema.pre('save', async function(next) {
-  const user = this;
-  
-  if (user.isModified('password')) {
-    user.password = await bcrypt.hash(user.password, 10);
+userSchema.pre('save', async function (next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
   }
-  
   next();
 });
+
 const User = mongoose.model('User', userSchema);
+
 module.exports = User;
-User.collection.createIndex({ verificationToken: 1 }, { expireAfterSeconds: 600 }); // Expire après 10 minutes
+
 
 

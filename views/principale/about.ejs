@@ -1,83 +1,111 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/css/Aboute.css">
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>À propos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/css/About.css" />
 </head>
 <body>
-   <!-- Hero Section -->
+     <nav class="navbar">
+  <div class="logo">Espace d'Étude</div>
+
+  <div class="nav-right">
+    <ul>
+      <li><a href="accueil">Accueil</a></li>
+      <li><a href="connexion">Connexion</a></li>
+      <li><a href="contact">Contact</a></li>
+      <li><a href="about">À propos</a></li>
+    </ul>
+
+    <div class="burger">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+</nav>
+
+
+
 <section class="about-hero">
     <div class="container">
-        <h1>About Study Room</h1>
+        <h1>Bienvenue sur Espace d’Étude Collaboratif</h1>
+        <p>Une plateforme interactive facilitant l’échange et la collaboration entre enseignants et étudiants.</p>
     </div>
 </section>
 
-<!-- About Section -->
 <section class="about-section">
     <div class="container">
         <div class="about-grid">
-            <div class="about-image">
-                <img src="Study Room white.svg" alt="Our Office">
-            </div>
             <div class="about-content">
-                <h2>Your Academic Success Hub</h2>
-                <p>Study Room is the premier digital platform for university students seeking to master course material through strategic quiz-based learning. Our specialized system combines comprehensive lesson modules with intelligent quiz engines that adapt to your academic program and personal learning pace. Developed in collaboration with university professors and educational researchers, our content library covers 300+ courses across all major disciplines.</p>
-                <p>Our platform features exam simulation technology that replicates real university testing environments, complete with timed assessments and performance analytics. The smart quiz generator creates personalized tests based on your weak areas, lecture notes, and upcoming syllabus topics. With integrated progress tracking and benchmark comparisons against peer performance, Study Room gives you the competitive edge needed to excel in rigorous academic programs.</p>
+                <h2>Votre partenaire pour la réussite académique</h2>
+                <p>
+                    Espace d’Étude Collaboratif est une plateforme numérique conçue pour accompagner les étudiants universitaires
+                    dans l'apprentissage et la maîtrise des cours grâce à une approche basée sur des quiz stratégiques.
+                    Notre système combine des modules de cours complets à un moteur intelligent de quiz qui s’adapte à votre programme académique
+                    et à votre rythme d’apprentissage.
+                </p>
+                <p>
+                    Conçue en collaboration avec des enseignants et des chercheurs pédagogiques, notre bibliothèque couvre plus de 300 cours
+                    dans toutes les disciplines majeures. La plateforme offre également des simulations d’examens fidèles aux conditions réelles,
+                    avec gestion du temps et analyses détaillées de performance.
+                </p>
+                <p>
+                    Grâce à notre générateur de quiz personnalisé, vous bénéficiez de tests ciblés sur vos points faibles, basés sur vos notes de cours et le contenu à venir.
+                    Le suivi de progression et les comparaisons avec les performances des autres utilisateurs vous donnent un avantage compétitif pour exceller dans vos études.
+                </p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Values Section -->
+
 <section class="values-section">
     <div class="container">
-        <h2 style="text-align: center; margin-bottom: 50px;">Our Academic Principles</h2>
+        <h2 style="text-align: center; margin-bottom: 50px;">Nos principes académiques</h2>
         <div class="values-grid">
             <div class="value-card">
                 <i class="fas fa-brain"></i>
-                <h3>Mastery Learning</h3>
-                <p>Structured quizzes ensure concept mastery before advancing</p>
+                <h3>Apprentissage par la maîtrise</h3>
+                <p>Des quiz structurés pour assurer la compréhension avant chaque étape.</p>
             </div>
             <div class="value-card">
                 <i class="fas fa-graduation-cap"></i>
-                <h3>Academic Integrity</h3>
-                <p>All content verified by university accreditation standards</p>
+                <h3>Intégrité académique</h3>
+                <p>Contenu rigoureusement validé selon les standards universitaires.</p>
             </div>
             <div class="value-card">
                 <i class="fas fa-rocket"></i>
-                <h3>Performance Analytics</h3>
-                <p>Real-time insights to optimize study efficiency</p>
+                <h3>Analyse de performance</h3>
+                <p>Des données en temps réel pour optimiser votre efficacité d’étude.</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Team Section -->
+
 <section class="team-section">
     <div class="container">
-        <h2 style="text-align: center; margin-bottom: 50px;">Academic Leadership</h2>
+        <h2 style="text-align: center; margin-bottom: 50px;">L'équipe académique</h2>
         <div class="team-grid">
             <div class="team-member">
-                
-                <h3>Anas Amechaibou</h3>
-                
-            </div>
-            <div class="team-member">
-                
                 <h3>Belhossain Mohamed</h3>
-                
+                <p>Fondateur & Développeur principal</p>
             </div>
-            <div class="team-member">
-                
-                <h3>Itlouhen Mohamed</h3>
-                
-            </div>
+           
         </div>
     </div>
 </section>
+ <script>
+        const burger = document.querySelector('.burger');
+const navLinks = document.querySelector('.navbar ul');
+
+burger.addEventListener('click', () => {
+  navLinks.classList.toggle('active');
+});
+
+    </script>
 </body>
 </html>
