@@ -1,27 +1,41 @@
-ce projet est réalisé en trinome , j'ai fourni toute mes efforts pour terminer le project , mais le temps ne m'a pas permis d'atteindre la versions a la quelle je voulais arriver...
-Contexte
-Développement d'une application web pour la création et gestion d'examens en ligne par les enseignants et la participation des étudiants.
 
-Fonctionnalités
-Formulaire d'inscription : Email, nom, prénom, date de naissance, sexe, établissement, filière.
+## 🧩 **Résumé du Contexte**
+Application web destinée :
+- Aux **enseignants** : création et gestion d'examens.
+- Aux **étudiants** : participation aux examens via des liens uniques.
 
-Formulaire de connexion : Vérification email et mot de passe avec gestion de session JWT
 
-Espace Enseignant :
+## 🚀 **Fonctionnalités Clés**
 
-Création d'examens (titre, description, public ciblé).
+### 🔐 Authentification
+- **Inscription** : formulaire avec champs classiques (email, nom, prénom, etc.).
+- **Connexion** : vérification des identifiants + gestion de session via **JWT**.
 
-Ajout de questions (QCM et directe) avec tolérance d'erreurs et durée.
+### 🧑‍🏫 Espace Enseignant
+- **Création d'examens** : titre, description, public ciblé (filière, niveau…).
+- **Ajout de questions** :
+  - **QCM** : choix multiples avec bonne(s) réponse(s).
+  - **Questions directes** : réponses libres.
+  - **Tolérance d’erreurs** : utile pour les réponses textuelles (ex. : Levenshtein distance).
+  - **Durée** : temps limite par question ou par examen.
+- **Médias** : upload et intégration d’images, audio, vidéo.
+- **Lien d’accès unique** : généré automatiquement pour chaque examen.
 
-Gestion des médias (images, audio, vidéo).
 
-Génération automatique d'un lien d'accès unique.
 
-Technologies
-Backend : Node.js, Express
+## 🛠️ **Technologies Utilisées**
 
-Frontend : HTML, CSS, JavaScript (EJS)
+| Composant       | Technologie         |
+|----------------|---------------------|
+| Backend         | Node.js + Express   |
+| Frontend        | HTML, CSS, JS (EJS) |
+| Base de données | MongoDB             |
+| Authentification| JWT                 |
 
-Base de données :MongoDB
 
-Authentification : JWT
+
+### 🔒 Sécurité
+- Hash des mots de passe avec **bcrypt**
+- Vérification du token JWT sur les routes protégées
+- Limitation d’accès selon le rôle (enseignant vs étudiant)
+
